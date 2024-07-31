@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:alpine
+    environment:
+      POSTGRES_DB: album-store
+      POSTGRES_PASSWORD: albumstore
+      POSTGRES_USER: albumstoreuser
+    volumes:
+      - ./data:/var/lib/postgresql/data
+      - ./logs:/var/log/postgresql
+      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
+    ports:
+      - 5435:5432
+    restart: on-failure:3
+    networks:
+      - redis-network
+  pgweb:
+    image: sosedoff/pgweb
+    depends_on:
+      - postgres
+    environment:
+      PGWEB_DATABASE_URL: postgres://albumstoreuser:albumstore@postgres:5432/album-store?sslmode=disable
+    ports:
+      - 8085:8081
+    restart: on-failure:3
+  redis:
+    image: redis:latest
+    command: redis-server
+    volumes:
+      - redis:/var/lib/redis
+      - redis-config:/usr/local/etc/redis/redis.conf
+    ports:
+      - 6379:6379
+    networks:
+      - redis-network
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+      - HTTP_USER=root
+      - HTTP_PASSWORD=qwerty
+    ports:
+      - 8081:8081
+    networks:
+      - redis-network
+    depends_on:
+      - redis
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    networks:
+      - redis-network
+    depends_on:
+      - redis
+      - postgres
+volumes:
+  redis:
+  redis-config:
+networks:
+  redis-network:
+    driver: bridge

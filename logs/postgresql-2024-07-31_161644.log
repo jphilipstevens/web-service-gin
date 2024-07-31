@@ -1,0 +1,13 @@
+2024-07-31 16:16:44.003 GMT [1]: [3-1] user=,db= LOG:  starting PostgreSQL 16.3 on x86_64-pc-linux-musl, compiled by gcc (Alpine 13.2.1_git20240309) 13.2.1 20240309, 64-bit
+2024-07-31 16:16:44.003 GMT [1]: [4-1] user=,db= LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2024-07-31 16:16:44.003 GMT [1]: [5-1] user=,db= LOG:  listening on IPv6 address "::", port 5432
+2024-07-31 16:16:44.007 GMT [1]: [6-1] user=,db= LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2024-07-31 16:16:44.032 GMT [31]: [1-1] user=,db= LOG:  database system was shut down at 2024-07-31 16:16:40 GMT
+2024-07-31 16:16:44.047 GMT [1]: [7-1] user=,db= LOG:  database system is ready to accept connections
+2024-07-31 16:17:55.223 GMT [1]: [8-1] user=,db= LOG:  received fast shutdown request
+2024-07-31 16:17:55.225 GMT [1]: [9-1] user=,db= LOG:  aborting any active transactions
+2024-07-31 16:17:55.232 GMT [1]: [10-1] user=,db= LOG:  background worker "logical replication launcher" (PID 34) exited with exit code 1
+2024-07-31 16:17:55.233 GMT [29]: [1-1] user=,db= LOG:  shutting down
+2024-07-31 16:17:55.235 GMT [29]: [2-1] user=,db= LOG:  checkpoint starting: shutdown immediate
+2024-07-31 16:17:55.259 GMT [29]: [3-1] user=,db= LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.007 s, sync=0.003 s, total=0.026 s; sync files=2, longest=0.002 s, average=0.002 s; distance=0 kB, estimate=0 kB; lsn=0/193DBC0, redo lsn=0/193DBC0
+2024-07-31 16:17:55.286 GMT [1]: [11-1] user=,db= LOG:  database system is shut down
