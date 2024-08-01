@@ -17,7 +17,8 @@ type MockAlbumRepository struct {
 	mock.Mock
 }
 
-func (m *MockAlbumRepository) GetAlbums(ctx context.Context, artist string) (*db.Paginated[Album], error) {
+func (m *MockAlbumRepository) GetAlbums(ctx context.Context, params GetAlbumsParams) (*db.Paginated[Album], error) {
+	artist := params.Artist
 	args := m.Called(ctx, artist)
 	return args.Get(0).(*db.Paginated[Album]), args.Error(1)
 }
@@ -73,7 +74,11 @@ func TestGetAlbumsService(t *testing.T) {
 
 		mockCacher.On("Get", ctx, "_albumsArtistFilter:Test Artist").Return(string(cachedData), nil).Once()
 
-		albums, err := service.GetAlbums(ctx, artist)
+		albums, err := service.GetAlbums(ctx, GetAlbumsParams{
+			Artist: artist,
+			Limit:  10,
+			Page:   0,
+		})
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedAlbums, albums)
@@ -89,7 +94,11 @@ func TestGetAlbumsService(t *testing.T) {
 		mockCacher.On("Get", ctx, "_albumsArtistFilter:Test Artist").Return("", cache.ErrCacheMiss).Once()
 		mockRepo.On("GetAlbums", ctx, artist).Return(expectedAlbums, nil).Once()
 
-		albums, err := service.GetAlbums(ctx, artist)
+		albums, err := service.GetAlbums(ctx, GetAlbumsParams{
+			Artist: artist,
+			Limit:  10,
+			Page:   0,
+		})
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedAlbums, albums)

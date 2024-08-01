@@ -21,7 +21,8 @@ func NewAlbumController(albumService AlbumService) AlbumController {
 func (ac *albumController) GetAlbums(c *gin.Context) {
 	artist := c.Query("artist")
 	ctx := c.Request.Context()
-	albums, err := ac.albumService.GetAlbums(ctx, artist)
+	params := GetAlbumsParams{Artist: artist, Limit: 10, Page: 1}
+	albums, err := ac.albumService.GetAlbums(ctx, params)
 	if err != nil {
 		c.Error(err)
 		return

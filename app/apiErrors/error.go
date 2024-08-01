@@ -22,6 +22,30 @@ func New(code string, message string, status int) *APIError {
 	}
 }
 
+func NewNotFoundError(message string) *APIError {
+	errorMessage := message
+	if errorMessage == "" {
+		errorMessage = "Resource not found"
+	}
+	return &APIError{
+		Code:    "NOT_FOUND",
+		Status:  404,
+		Message: errorMessage,
+	}
+}
+
+func NewGenericError(message string) *APIError {
+	errorMessage := message
+	if errorMessage == "" {
+		errorMessage = "Something went wrong"
+	}
+	return &APIError{
+		Code:    "INTERNAL_SERVER_ERROR",
+		Status:  500,
+		Message: errorMessage,
+	}
+}
+
 func (e *APIError) Error() string {
 	return fmt.Sprintf("%s: %s", e.Code, e.Message)
 }

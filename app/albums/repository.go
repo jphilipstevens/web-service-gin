@@ -9,7 +9,7 @@ import (
 )
 
 type AlbumRepository interface {
-	GetAlbums(ctx context.Context, artist string) (*db.Paginated[Album], error)
+	GetAlbums(ctx context.Context, params GetAlbumsParams) (*db.Paginated[Album], error)
 	Insert(ctx context.Context, album Album) error
 	InsertBatch(ctx context.Context, album []Album) error
 }
@@ -24,16 +24,22 @@ func NewAlbumRepository(dbConn *sql.DB) AlbumRepository {
 	}
 }
 
-func (ar *albumRepository) GetAlbums(ctx context.Context, artist string) (*db.Paginated[Album], error) {
+func (ar *albumRepository) GetAlbums(ctx context.Context, params GetAlbumsParams) (*db.Paginated[Album], error) {
+
+	var artist = params.Artist
 	var query string
 	var args []interface{}
+	offset := (params.Page * -1) - params.Limit
+	if offset < 0 {
+		offset = 0
+	}
 
 	if artist != "" {
-		query = "SELECT * FROM albums WHERE artist ILIKE $1"
-		args = []interface{}{artist}
+		query = "SELECT * FROM albums WHERE artist ILIKE $1 LIMIT $2 OFFSET $3"
+		args = []interface{}{artist, params.Limit, offset}
 	} else {
-		query = "SELECT * FROM albums"
-		args = nil
+		query = "SELECT * FROM albums LIMIT $1 OFFSET $2"
+		args = []interface{}{params.Limit, offset}
 	}
 
 	rows, err := ar.dbConn.QueryContext(ctx, query, args...)
@@ -42,15 +48,8 @@ func (ar *albumRepository) GetAlbums(ctx context.Context, artist string) (*db.Pa
 	}
 	defer rows.Close()
 
-	if err := rows.Err(); err != nil {
-		return nil, db.MapDBError(&err)
-	}
-
 	var albums []Album
 	for rows.Next() {
-		if len(albums) >= 5 {
-			break // Limit to 5 albums
-		}
 		var album Album
 		if err := rows.Scan(&album.ID, &album.Title, &album.Artist, &album.Price); err != nil {
 			return nil, db.MapDBError(&err)

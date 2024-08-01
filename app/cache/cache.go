@@ -2,7 +2,7 @@ package cache
 
 import (
 	"context"
-	"errors"
+	"example/web-service-gin/app/apiErrors"
 	"fmt"
 	"time"
 
@@ -25,7 +25,8 @@ type redisClient struct {
 	client *redis.Client
 }
 
-var ErrCacheMiss = errors.New("cache miss")
+var ErrCacheMiss = apiErrors.NewNotFoundError("")
+var ErrCacheGeneric = apiErrors.NewGenericError("")
 
 func NewCacher(cfg RedisClientConfig) Cacher {
 	rdb := redis.NewClient(&redis.Options{
@@ -40,11 +41,24 @@ func NewCacher(cfg RedisClientConfig) Cacher {
 func (rc *redisClient) Get(ctx context.Context, key string) (string, error) {
 	val, err := rc.client.Get(ctx, key).Result()
 	if err != nil {
-		return "", err
+		// TODO: Handle cache miss error
+		return "", MapCacheError(&err)
 	}
 	return val, nil
 }
 
 func (rc *redisClient) Set(ctx context.Context, key string, value string, expiration time.Duration) error {
-	return nil
+	err := rc.client.Set(ctx, key, value, expiration).Err()
+	return MapCacheError(&err)
+}
+
+func MapCacheError(err *error) error {
+	switch {
+	case *err == redis.Nil:
+		return ErrCacheMiss
+	case *err != nil:
+		return ErrCacheGeneric
+	default:
+		return nil
+	}
 }

@@ -18,8 +18,8 @@ type MockAlbumService struct {
 	mock.Mock
 }
 
-func (m *MockAlbumService) GetAlbums(ctx context.Context, artist string) (*db.Paginated[Album], error) {
-	args := m.Called(ctx, artist)
+func (m *MockAlbumService) GetAlbums(ctx context.Context, params GetAlbumsParams) (*db.Paginated[Album], error) {
+	args := m.Called(ctx, params)
 	result := args.Get(0)
 	if result == nil {
 		return nil, args.Error(1)
@@ -43,7 +43,11 @@ func TestGetAlbums(t *testing.T) {
 			Total: 1,
 		}
 
-		mockService.On("GetAlbums", mock.Anything, "John Coltrane").Return(&expectedAlbums, nil)
+		mockService.On("GetAlbums", mock.Anything, GetAlbumsParams{
+			Artist: "John Coltrane",
+			Limit:  10,
+			Page:   1,
+		}).Return(&expectedAlbums, nil)
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)
@@ -65,7 +69,11 @@ func TestGetAlbums(t *testing.T) {
 		mockService := new(MockAlbumService)
 		controller := NewAlbumController(mockService)
 
-		mockService.On("GetAlbums", mock.Anything, "Unknown").Return(nil, errors.New("service error"))
+		mockService.On("GetAlbums", mock.Anything, GetAlbumsParams{
+			Artist: "Unknown",
+			Limit:  10,
+			Page:   1,
+		}).Return(nil, errors.New("service error"))
 
 		w := httptest.NewRecorder()
 		c, _ := gin.CreateTestContext(w)

@@ -9,7 +9,7 @@ import (
 )
 
 type AlbumService interface {
-	GetAlbums(ctx context.Context, artist string) (*db.Paginated[Album], error)
+	GetAlbums(ctx context.Context, params GetAlbumsParams) (*db.Paginated[Album], error)
 }
 
 type albumService struct {
@@ -24,8 +24,8 @@ func NewAlbumService(cacher cache.Cacher, albumsRepository AlbumRepository) Albu
 	}
 }
 
-func (as *albumService) GetAlbums(ctx context.Context, artist string) (*db.Paginated[Album], error) {
-	albumSearchCacheKey := fmt.Sprintf("_albumsArtistFilter:%s", artist)
+func (as *albumService) GetAlbums(ctx context.Context, params GetAlbumsParams) (*db.Paginated[Album], error) {
+	albumSearchCacheKey := fmt.Sprintf("_albumsArtistFilter:%s", params.Artist)
 	cachedAlbums, err := as.cacher.Get(ctx, albumSearchCacheKey)
 	if err == nil && cachedAlbums != "" {
 		var filteredAlbums db.Paginated[Album]
@@ -36,6 +36,6 @@ func (as *albumService) GetAlbums(ctx context.Context, artist string) (*db.Pagin
 	}
 
 	// TODO save request to cache for later fetching
-	albums, err := as.albumsRepository.GetAlbums(ctx, artist)
+	albums, err := as.albumsRepository.GetAlbums(ctx, params)
 	return albums, err
 }

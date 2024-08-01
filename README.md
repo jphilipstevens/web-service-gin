@@ -31,8 +31,7 @@
 
 - [ ] Add swagger
 - [ ] Add tests
-- [ ] logger
-- [ ] graceful shutdown
-- [ ] circuit breaker
-- [ ] create a docker image
+- [x] logger
+- [x] graceful shutdown
+- [x] create a docker image
 - [ ] CI/CD
