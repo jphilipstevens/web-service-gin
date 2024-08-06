@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+const (
+	serviceName = "album-service-repository"
+)
+
 type AlbumRepository interface {
 	GetAlbums(ctx context.Context, params GetAlbumsParams) (*db.Paginated[Album], error)
 	Insert(ctx context.Context, album Album) error
@@ -15,10 +19,10 @@ type AlbumRepository interface {
 }
 
 type albumRepository struct {
-	dbConn *sql.DB
+	dbConn *db.Database
 }
 
-func NewAlbumRepository(dbConn *sql.DB) AlbumRepository {
+func NewAlbumRepository(dbConn *db.Database) AlbumRepository {
 	return &albumRepository{
 		dbConn: dbConn,
 	}
@@ -42,7 +46,7 @@ func (ar *albumRepository) GetAlbums(ctx context.Context, params GetAlbumsParams
 		args = []interface{}{params.Limit, offset}
 	}
 
-	rows, err := ar.dbConn.QueryContext(ctx, query, args...)
+	rows, err := ar.dbConn.QueryWithSpan(ctx, serviceName, query, args...)
 	if err != nil {
 		return nil, db.MapDBError(&err)
 	}
@@ -86,8 +90,12 @@ func (ar *albumRepository) countAlbums(ctx context.Context, artist string) (int,
 		args = nil
 	}
 
-	row := ar.dbConn.QueryRowContext(ctx, query, args...)
-	if err := row.Scan(&count); err != nil {
+	row, err := ar.dbConn.QueryWithSpan(ctx, serviceName, query, args...)
+	if err != nil {
+		return 0, err
+	}
+
+	if err = row.Scan(&count); err != nil {
 		return 0, err
 	}
 
@@ -95,7 +103,7 @@ func (ar *albumRepository) countAlbums(ctx context.Context, artist string) (int,
 }
 
 func (ar *albumRepository) Insert(ctx context.Context, album Album) error {
-	_, err := ar.dbConn.ExecContext(ctx, "INSERT INTO albums (id, title, artist, price) VALUES ($1, $2, $3, $4)", album.ID, album.Title, album.Artist, album.Price)
+	_, err := ar.dbConn.ExecWithSpan(ctx, serviceName, "INSERT INTO albums (id, title, artist, price) VALUES ($1, $2, $3, $4)", album.ID, album.Title, album.Artist, album.Price)
 	if err != nil {
 		return err
 	}
@@ -116,6 +124,6 @@ func (ar *albumRepository) InsertBatch(ctx context.Context, albums []Album) erro
 
 	query := fmt.Sprintf("INSERT INTO albums (id, title, artist, price) VALUES %s ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, artist = EXCLUDED.artist, price = EXCLUDED.price", strings.Join(values, ","))
 
-	_, err := ar.dbConn.ExecContext(ctx, query, args...)
+	_, err := ar.dbConn.ExecWithSpan(ctx, serviceName, query, args...)
 	return err
 }

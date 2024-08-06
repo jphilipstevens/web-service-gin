@@ -1,14 +1,14 @@
 package config
 
 import (
-	"database/sql"
 	"example/web-service-gin/app/cache"
+	"example/web-service-gin/app/db"
 
 	"github.com/gin-gonic/gin"
 )
 
 type Dependencies struct {
 	Cache  cache.Cacher
-	DB     *sql.DB
+	DB     *db.Database
 	Router *gin.Engine
 }
