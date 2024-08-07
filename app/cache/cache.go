@@ -52,7 +52,7 @@ func (rc *redisCache) Get(serviceName string, ctx context.Context, key string) (
 		ResponseTime: time.Since(startTime),
 		Key:          key,
 		Error:        err,
-		Hit:          val == "",
+		Hit:          val != "",
 	}
 	currentContext.Cache = append(currentContext.Cache, newCacheCall)
 	_ = context.WithValue(ctx, clientContext.ClientContextKey, currentContext)
