@@ -1,6 +1,7 @@
 package dependencies
 
 import (
+	"example/web-service-gin/app/appTracer"
 	"example/web-service-gin/app/cache"
 	"example/web-service-gin/app/db"
 
@@ -9,6 +10,7 @@ import (
 
 type Dependencies struct {
 	Cache  cache.Cacher
-	DB     *db.Database
+	DB     db.Database
 	Router *gin.Engine
+	Tracer appTracer.AppTracer
 }

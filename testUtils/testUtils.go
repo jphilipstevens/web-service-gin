@@ -2,7 +2,12 @@ package testUtils
 
 import (
 	"context"
+	"database/sql"
+	"example/web-service-gin/app/appTracer"
 	"example/web-service-gin/app/clientContext"
+	"example/web-service-gin/app/db"
+
+	"go.opentelemetry.io/otel/trace"
 )
 
 func CreateTestContext() context.Context {
@@ -17,4 +22,23 @@ func CreateTestContext() context.Context {
 	}
 	ctx = context.WithValue(ctx, clientContext.ClientContextKey, &currentContext)
 	return ctx
+}
+
+type dummyAppTracer struct {
+}
+
+func (d *dummyAppTracer) CreateDownstreamSpan(ctx context.Context, serviceName string) (context.Context, trace.Span) {
+	return ctx, nil
+}
+
+func NewAppTracer() appTracer.AppTracer {
+	return &dummyAppTracer{}
+}
+
+func NewDatabase(mockedDB *sql.DB) db.Database {
+	testDatabase := db.DatabaseImpl{
+		Client:    mockedDB,
+		AppTracer: NewAppTracer(),
+	}
+	return &testDatabase
 }

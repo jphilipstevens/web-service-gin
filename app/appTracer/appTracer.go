@@ -2,15 +2,27 @@ package appTracer
 
 import (
 	"context"
-	"example/web-service-gin/config"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 )
 
-func CreateDownstreamSpan(ctx context.Context, serviceName string) (context.Context, trace.Span) {
-	serverName := config.GetConfig().AppName
-	tracer := otel.Tracer(serverName)
+type AppTracer interface {
+	CreateDownstreamSpan(ctx context.Context, serviceName string) (context.Context, trace.Span)
+}
+
+type appTracerImpl struct {
+	serverName string
+}
+
+func NewDownstreamSpan(serverName string) AppTracer {
+	return &appTracerImpl{
+		serverName: serverName,
+	}
+}
+
+func (d *appTracerImpl) CreateDownstreamSpan(ctx context.Context, serviceName string) (context.Context, trace.Span) {
+	tracer := otel.Tracer(d.serverName)
 	spanCtx := trace.SpanContextFromContext(ctx)
 
 	// Create a child span with a new span ID

@@ -20,25 +20,29 @@ type Cacher interface {
 }
 
 type redisCache struct {
-	Client *redis.Client
+	Client    *redis.Client
+	appTracer appTracer.AppTracer
 }
 
 var ErrCacheMiss = apiErrors.NewNotFoundError("")
 var ErrCacheGeneric = apiErrors.NewGenericError("")
 
-func NewCacher(cfg config.RedisClientConfig) Cacher {
+func NewCacher(cfg config.RedisClientConfig, appTracer appTracer.AppTracer) Cacher {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
 		Password: cfg.Password,
 		DB:       cfg.DB,
 	})
 
-	return &redisCache{Client: rdb}
+	return &redisCache{
+		Client:    rdb,
+		appTracer: appTracer,
+	}
 }
 
 func (rc *redisCache) Get(serviceName string, ctx context.Context, key string) (string, error) {
 	startTime := time.Now()
-	ctx, span := appTracer.CreateDownstreamSpan(ctx, serviceName)
+	ctx, span := rc.appTracer.CreateDownstreamSpan(ctx, serviceName)
 	defer span.End()
 
 	val, err := rc.Client.Get(ctx, key).Result()
@@ -69,7 +73,7 @@ func (rc *redisCache) Get(serviceName string, ctx context.Context, key string) (
 
 func (rc *redisCache) Set(serviceName string, ctx context.Context, key string, value string, expiration time.Duration) error {
 	startTime := time.Now()
-	ctx, span := appTracer.CreateDownstreamSpan(ctx, serviceName)
+	ctx, span := rc.appTracer.CreateDownstreamSpan(ctx, serviceName)
 	defer span.End()
 
 	err := rc.Client.Set(ctx, key, value, expiration).Err()

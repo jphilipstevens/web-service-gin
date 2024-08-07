@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"example/web-service-gin/app/albums"
+	"example/web-service-gin/app/appTracer"
 	"example/web-service-gin/app/cache"
 	"example/web-service-gin/app/db"
 	"example/web-service-gin/app/dependencies"
@@ -52,10 +53,11 @@ func RunApp() {
 	configFile := config.GetConfig()
 
 	// Initialize Redis client
-	redisClient := cache.NewCacher(configFile.Redis)
+	appTracer := appTracer.NewDownstreamSpan(configFile.AppName)
+	redisClient := cache.NewCacher(configFile.Redis, appTracer)
 
 	// Initialize database connection
-	dbConn, err := db.ConnectToDB(configFile.DB)
+	dbConn, err := db.NewDatabase(configFile.DB, appTracer)
 	if err != nil {
 		panic(fmt.Errorf("failed to connect to database: %w", err))
 	}

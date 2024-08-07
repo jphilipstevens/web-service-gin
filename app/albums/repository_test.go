@@ -16,9 +16,7 @@ func TestNewAlbumRepository(t *testing.T) {
 	mockDB, _, _ := sqlmock.New()
 	defer mockDB.Close()
 
-	repo := NewAlbumRepository(&db.Database{
-		Client: mockDB,
-	})
+	repo := NewAlbumRepository(testUtils.NewDatabase(mockDB))
 	assert.NotNil(t, repo)
 }
 
@@ -29,9 +27,7 @@ func TestGetAlbumsRepository(t *testing.T) {
 		mockDB, mock, _ := sqlmock.New()
 		defer mockDB.Close()
 
-		repo := NewAlbumRepository(&db.Database{
-			Client: mockDB,
-		})
+		repo := NewAlbumRepository(testUtils.NewDatabase(mockDB))
 		rows := sqlmock.NewRows([]string{"id", "title", "artist", "price"}).
 			AddRow("1", "Album 1", "Artist 1", 9.99).
 			AddRow("2", "Album 2", "Artist 2", 14.99)
@@ -61,9 +57,7 @@ func TestGetAlbumsRepository(t *testing.T) {
 		mockDB, mock, _ := sqlmock.New()
 		defer mockDB.Close()
 
-		repo := NewAlbumRepository(&db.Database{
-			Client: mockDB,
-		})
+		repo := NewAlbumRepository(testUtils.NewDatabase(mockDB))
 
 		rows := sqlmock.NewRows([]string{"id", "title", "artist", "price"}).
 			AddRow("1", "Album 1", "Artist 1", 9.99)
@@ -91,9 +85,7 @@ func TestInsert(t *testing.T) {
 	mockDB, mock, _ := sqlmock.New()
 	defer mockDB.Close()
 
-	repo := NewAlbumRepository(&db.Database{
-		Client: mockDB,
-	})
+	repo := NewAlbumRepository(testUtils.NewDatabase(mockDB))
 
 	album := Album{ID: "1", Title: "New Album", Artist: "New Artist", Price: 19.99}
 
@@ -110,9 +102,7 @@ func TestInsertBatch(t *testing.T) {
 	mockDB, mock, _ := sqlmock.New()
 	defer mockDB.Close()
 
-	repo := NewAlbumRepository(&db.Database{
-		Client: mockDB,
-	})
+	repo := NewAlbumRepository(testUtils.NewDatabase(mockDB))
 
 	albums := []Album{
 		{ID: "1", Title: "Album 1", Artist: "Artist 1", Price: 9.99},
@@ -132,9 +122,7 @@ func TestGetAlbumsNoResults(t *testing.T) {
 	mockDB, mock, _ := sqlmock.New()
 	defer mockDB.Close()
 
-	repo := NewAlbumRepository(&db.Database{
-		Client: mockDB,
-	})
+	repo := NewAlbumRepository(testUtils.NewDatabase(mockDB))
 
 	mock.ExpectQuery("SELECT \\* FROM albums").WillReturnRows(sqlmock.NewRows([]string{"id", "title", "artist", "price"}))
 	mock.ExpectQuery("SELECT COUNT\\(\\*\\) FROM albums").WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
@@ -154,9 +142,7 @@ func TestGetAlbumsError(t *testing.T) {
 	mockDB, mock, _ := sqlmock.New()
 	defer mockDB.Close()
 
-	repo := NewAlbumRepository(&db.Database{
-		Client: mockDB,
-	})
+	repo := NewAlbumRepository(testUtils.NewDatabase(mockDB))
 
 	mock.ExpectQuery("SELECT \\* FROM albums").WillReturnError(sql.ErrConnDone)
 
@@ -174,9 +160,7 @@ func TestInsertError(t *testing.T) {
 	mockDB, mock, _ := sqlmock.New()
 	defer mockDB.Close()
 
-	repo := NewAlbumRepository(&db.Database{
-		Client: mockDB,
-	})
+	repo := NewAlbumRepository(testUtils.NewDatabase(mockDB))
 
 	album := Album{ID: "1", Title: "New Album", Artist: "New Artist", Price: 19.99}
 
@@ -193,9 +177,7 @@ func TestInsertBatchEmptySlice(t *testing.T) {
 	mockDB, _, _ := sqlmock.New()
 	defer mockDB.Close()
 
-	repo := NewAlbumRepository(&db.Database{
-		Client: mockDB,
-	})
+	repo := NewAlbumRepository(testUtils.NewDatabase(mockDB))
 
 	err := repo.InsertBatch(testUtils.CreateTestContext(), []Album{})
 	assert.NoError(t, err)
@@ -206,9 +188,7 @@ func TestInsertBatchError(t *testing.T) {
 	mockDB, mock, _ := sqlmock.New()
 	defer mockDB.Close()
 
-	repo := NewAlbumRepository(&db.Database{
-		Client: mockDB,
-	})
+	repo := NewAlbumRepository(testUtils.NewDatabase(mockDB))
 
 	albums := []Album{
 		{ID: "1", Title: "Album 1", Artist: "Artist 1", Price: 9.99},
@@ -228,10 +208,7 @@ func TestGetAlbumsScanError(t *testing.T) {
 	mockDB, mock, _ := sqlmock.New()
 	defer mockDB.Close()
 
-	repo := NewAlbumRepository(&db.Database{
-		Client: mockDB,
-	})
-
+	repo := NewAlbumRepository(testUtils.NewDatabase(mockDB))
 	mock.ExpectQuery("SELECT \\* FROM albums").
 		WillReturnRows(sqlmock.NewRows([]string{"id", "title", "artist", "price"}).
 			AddRow("1", "Album 1", "Artist 1", "invalid_price"))

@@ -19,10 +19,10 @@ type AlbumRepository interface {
 }
 
 type albumRepository struct {
-	dbConn *db.Database
+	dbConn db.Database
 }
 
-func NewAlbumRepository(dbConn *db.Database) AlbumRepository {
+func NewAlbumRepository(dbConn db.Database) AlbumRepository {
 	return &albumRepository{
 		dbConn: dbConn,
 	}
@@ -46,7 +46,7 @@ func (ar *albumRepository) GetAlbums(ctx context.Context, params GetAlbumsParams
 		args = []interface{}{params.Limit, offset}
 	}
 
-	rows, err := ar.dbConn.QueryWithSpan(ctx, serviceName, query, args...)
+	rows, err := ar.dbConn.QueryContext(serviceName, ctx, query, args...)
 	if err != nil {
 		return nil, db.MapDBError(&err)
 	}
@@ -72,7 +72,7 @@ func (ar *albumRepository) GetAlbums(ctx context.Context, params GetAlbumsParams
 }
 
 func (ar *albumRepository) Insert(ctx context.Context, album Album) error {
-	_, err := ar.dbConn.ExecWithSpan(ctx, serviceName, "INSERT INTO albums (id, title, artist, price) VALUES ($1, $2, $3, $4)", album.ID, album.Title, album.Artist, album.Price)
+	_, err := ar.dbConn.ExecContext(serviceName, ctx, "INSERT INTO albums (id, title, artist, price) VALUES ($1, $2, $3, $4)", album.ID, album.Title, album.Artist, album.Price)
 	if err != nil {
 		return err
 	}
@@ -93,6 +93,6 @@ func (ar *albumRepository) InsertBatch(ctx context.Context, albums []Album) erro
 
 	query := fmt.Sprintf("INSERT INTO albums (id, title, artist, price) VALUES %s ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, artist = EXCLUDED.artist, price = EXCLUDED.price", strings.Join(values, ","))
 
-	_, err := ar.dbConn.ExecWithSpan(ctx, serviceName, query, args...)
+	_, err := ar.dbConn.ExecContext(serviceName, ctx, query, args...)
 	return err
 }

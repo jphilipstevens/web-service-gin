@@ -43,7 +43,7 @@ func createAlbumsTable(ctx context.Context, db *sql.DB) error {
 	return err
 }
 
-func SeedAlbums(dbConn *db.Database) error {
+func SeedAlbums(dbConn db.Database) error {
 	// Create the albums table if it doesn't exist
 	if err := createAlbumsTable(context.Background(), dbConn.GetClient()); err != nil {
 		return fmt.Errorf("fatal error cannot create Album Table: %w", err)

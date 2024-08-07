@@ -31,11 +31,10 @@ func setupTestRedis(t *testing.T) (*miniredis.Miniredis, Cacher) {
 		Port: port,
 	}
 
-	return mr, NewCacher(cfg)
+	return mr, NewCacher(cfg, testUtils.NewAppTracer())
 }
 
 func TestGet(t *testing.T) {
-	config.Init()
 	mr, cacher := setupTestRedis(t)
 	defer mr.Close()
 

@@ -3,6 +3,7 @@ package seed
 import (
 	"example/web-service-gin/app/db"
 	"example/web-service-gin/config"
+	"example/web-service-gin/testUtils"
 	"fmt"
 )
 
@@ -11,7 +12,8 @@ func Init() {
 	configFile := config.GetConfig()
 
 	// Initialize database connection
-	dbConn, err := db.ConnectToDB(configFile.DB)
+	// TODO: Review using testing app tracer. Not needed for seeding. But may be needed for the future
+	dbConn, err := db.NewDatabase(configFile.DB, testUtils.NewAppTracer())
 	if err != nil {
 		// Handle error
 		panic(fmt.Errorf("failed to connect to database: %w", err))
