@@ -3,10 +3,14 @@ package cache
 import (
 	"context"
 	"example/web-service-gin/app/apiErrors"
+	"example/web-service-gin/app/appTracer"
+	"example/web-service-gin/app/clientContext"
 	"fmt"
 	"time"
 
 	"github.com/go-redis/redis/v8"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type RedisClientConfig struct {
@@ -17,12 +21,12 @@ type RedisClientConfig struct {
 }
 
 type Cacher interface {
-	Get(ctx context.Context, key string) (val string, err error)
-	Set(ctx context.Context, key string, value string, expiration time.Duration) error
+	Get(serviceName string, ctx context.Context, key string) (val string, err error)
+	Set(serviceName string, ctx context.Context, key string, value string, expiration time.Duration) error
 }
 
-type redisClient struct {
-	client *redis.Client
+type redisCache struct {
+	Client *redis.Client
 }
 
 var ErrCacheMiss = apiErrors.NewNotFoundError("")
@@ -35,20 +39,73 @@ func NewCacher(cfg RedisClientConfig) Cacher {
 		DB:       cfg.DB,
 	})
 
-	return &redisClient{client: rdb}
+	return &redisCache{Client: rdb}
 }
 
-func (rc *redisClient) Get(ctx context.Context, key string) (string, error) {
-	val, err := rc.client.Get(ctx, key).Result()
+func (rc *redisCache) Get(serviceName string, ctx context.Context, key string) (string, error) {
+	startTime := time.Now()
+	ctx, span := appTracer.CreateDownstreamSpan(ctx, serviceName)
+	defer span.End()
+
+	val, err := rc.Client.Get(ctx, key).Result()
+	currentContext := ctx.Value(clientContext.ClientContextKey).(*clientContext.ClientContext)
+	newCacheCall := clientContext.CacheCall{
+		ServiceTransaction: clientContext.ServiceTransaction{
+			ServiceName: serviceName,
+			SpanId:      span.SpanContext().TraceID().String(),
+		},
+		Action:       "get",
+		ResponseTime: time.Since(startTime),
+		Key:          key,
+		Error:        err,
+		Hit:          val == "",
+	}
+	currentContext.Cache = append(currentContext.Cache, newCacheCall)
+	_ = context.WithValue(ctx, clientContext.ClientContextKey, currentContext)
 	if err != nil {
-		// TODO: Handle cache miss error
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 		return "", MapCacheError(&err)
 	}
+	span.SetStatus(codes.Ok, "")
+	span.SetAttributes(attribute.String("cache.action", "get"))
+	span.SetAttributes(attribute.String("cache.key", key))
+	span.SetAttributes(attribute.String("cache.value", val))
+
 	return val, nil
 }
 
-func (rc *redisClient) Set(ctx context.Context, key string, value string, expiration time.Duration) error {
-	err := rc.client.Set(ctx, key, value, expiration).Err()
+func (rc *redisCache) Set(serviceName string, ctx context.Context, key string, value string, expiration time.Duration) error {
+	startTime := time.Now()
+	ctx, span := appTracer.CreateDownstreamSpan(ctx, serviceName)
+	defer span.End()
+
+	err := rc.Client.Set(ctx, key, value, expiration).Err()
+
+	currentContext := ctx.Value(clientContext.ClientContextKey).(*clientContext.ClientContext)
+	newCacheCall := clientContext.CacheCall{
+		ServiceTransaction: clientContext.ServiceTransaction{
+			ServiceName: serviceName,
+			SpanId:      span.SpanContext().TraceID().String(),
+		},
+		Action:       "set",
+		ResponseTime: time.Since(startTime),
+		Key:          key,
+		Error:        err,
+		Hit:          false,
+	}
+	currentContext.Cache = append(currentContext.Cache, newCacheCall)
+	_ = context.WithValue(ctx, clientContext.ClientContextKey, currentContext)
+
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return MapCacheError(&err)
+	}
+	span.SetStatus(codes.Ok, "")
+	span.SetAttributes(attribute.String("cache.action", "set"))
+	span.SetAttributes(attribute.String("cache.key", key))
+
 	return MapCacheError(&err)
 }
 

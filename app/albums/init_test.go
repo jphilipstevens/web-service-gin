@@ -2,6 +2,7 @@ package albums
 
 import (
 	"context"
+	"example/web-service-gin/app/db"
 	"example/web-service-gin/config"
 	"testing"
 	"time"
@@ -13,14 +14,14 @@ import (
 )
 
 type MockCache struct {
-	mock.Mock
+	Client mock.Mock
 }
 
-func (rc *MockCache) Get(ctx context.Context, key string) (string, error) {
+func (rc *MockCache) Get(serviceName string, ctx context.Context, key string) (string, error) {
 	return "", nil
 }
 
-func (rc *MockCache) Set(ctx context.Context, key string, value string, expiration time.Duration) error {
+func (rc *MockCache) Set(serviceName string, ctx context.Context, key string, value string, expiration time.Duration) error {
 	return nil
 }
 
@@ -29,17 +30,20 @@ func TestInit(t *testing.T) {
 
 	t.Run("Successful Albums Module Init", func(t *testing.T) {
 		// Setup
-		db, _, err := sqlmock.New()
+		client, _, err := sqlmock.New()
 		if err != nil {
 			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 		}
-		defer db.Close()
+		defer client.Close()
+
+		database := db.Database{Client: client}
 
 		mockCache := new(MockCache)
+
 		router := gin.Default()
 
 		deps := &config.Dependencies{
-			DB:     db,
+			DB:     &database,
 			Cache:  mockCache,
 			Router: router,
 		}

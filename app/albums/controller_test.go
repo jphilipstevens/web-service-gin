@@ -40,7 +40,6 @@ func TestGetAlbums(t *testing.T) {
 			Items: []Album{
 				{ID: "1", Title: "Blue Train", Artist: "John Coltrane", Price: 56.99},
 			},
-			Total: 1,
 		}
 
 		mockService.On("GetAlbums", mock.Anything, GetAlbumsParams{

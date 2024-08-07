@@ -35,16 +35,16 @@ func (m *MockAlbumRepository) InsertBatch(ctx context.Context, albums []Album) e
 
 // Mock Cacher
 type MockCacher struct {
-	mock.Mock
+	Client mock.Mock
 }
 
-func (m *MockCacher) Get(ctx context.Context, key string) (string, error) {
-	args := m.Called(ctx, key)
+func (m *MockCacher) Get(serviceName string, ctx context.Context, key string) (string, error) {
+	args := m.Client.Called(ctx, key)
 	return args.String(0), args.Error(1)
 }
 
-func (m *MockCacher) Set(ctx context.Context, key string, value string, expiration time.Duration) error {
-	args := m.Called(ctx, key, value, expiration)
+func (m *MockCacher) Set(serviceName string, ctx context.Context, key string, value string, expiration time.Duration) error {
+	args := m.Client.Called(ctx, key, value, expiration)
 	return args.Error(0)
 }
 
@@ -68,11 +68,10 @@ func TestGetAlbumsService(t *testing.T) {
 	t.Run("Cache hit", func(t *testing.T) {
 		expectedAlbums := &db.Paginated[Album]{
 			Items: []Album{{ID: "1", Title: "Test Album", Artist: "Test Artist", Price: 9.99}},
-			Total: 1,
 		}
 		cachedData, _ := json.Marshal(expectedAlbums)
 
-		mockCacher.On("Get", ctx, "_albumsArtistFilter:Test Artist").Return(string(cachedData), nil).Once()
+		mockCacher.Client.On("Get", ctx, "_albumsArtistFilter:Test Artist").Return(string(cachedData), nil).Once()
 
 		albums, err := service.GetAlbums(ctx, GetAlbumsParams{
 			Artist: artist,
@@ -82,16 +81,15 @@ func TestGetAlbumsService(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedAlbums, albums)
-		mockCacher.AssertExpectations(t)
+		mockCacher.Client.AssertExpectations(t)
 	})
 
 	t.Run("Cache miss", func(t *testing.T) {
 		expectedAlbums := &db.Paginated[Album]{
 			Items: []Album{{ID: "2", Title: "Another Album", Artist: "Test Artist", Price: 14.99}},
-			Total: 1,
 		}
 
-		mockCacher.On("Get", ctx, "_albumsArtistFilter:Test Artist").Return("", cache.ErrCacheMiss).Once()
+		mockCacher.Client.On("Get", ctx, "_albumsArtistFilter:Test Artist").Return("", cache.ErrCacheMiss).Once()
 		mockRepo.On("GetAlbums", ctx, artist).Return(expectedAlbums, nil).Once()
 
 		albums, err := service.GetAlbums(ctx, GetAlbumsParams{
@@ -102,7 +100,7 @@ func TestGetAlbumsService(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedAlbums, albums)
-		mockCacher.AssertExpectations(t)
+		mockCacher.Client.AssertExpectations(t)
 		mockRepo.AssertExpectations(t)
 	})
 }

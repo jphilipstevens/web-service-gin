@@ -23,7 +23,7 @@ type DatabaseConfig struct {
 }
 
 type Database struct {
-	client *sql.DB
+	Client *sql.DB
 }
 
 func ConnectToDB(config DatabaseConfig) (*Database, error) {
@@ -43,11 +43,11 @@ func ConnectToDB(config DatabaseConfig) (*Database, error) {
 }
 
 func (db *Database) Close() {
-	db.client.Close()
+	db.Client.Close()
 }
 
 func (db *Database) GetClient() *sql.DB {
-	return db.client
+	return db.Client
 }
 
 // ExecWithSpan executes a SQL query with tracing and returns the result.
@@ -56,15 +56,9 @@ func (db *Database) ExecWithSpan(ctx context.Context, serviceName string, query 
 	spanCtx, span := appTracer.CreateDownstreamSpan(ctx, serviceName)
 	defer span.End()
 
-	stmt, err := db.client.PrepareContext(spanCtx, query)
+	result, err := db.Client.ExecContext(spanCtx, query, args...)
 	if err != nil {
 		span.RecordError(err)
-		return nil, err
-	}
-	defer stmt.Close()
-
-	result, err := stmt.ExecContext(spanCtx, args...)
-	if err != nil {
 		return nil, fmt.Errorf("error executing query: %w", err)
 	}
 
@@ -90,7 +84,7 @@ func (db *Database) QueryWithSpan(ctx context.Context, serviceName string, query
 	spanCtx, span := appTracer.CreateDownstreamSpan(ctx, serviceName)
 	defer span.End()
 
-	rows, err := db.client.QueryContext(spanCtx, query, args...)
+	rows, err := db.Client.QueryContext(spanCtx, query, args...)
 	if err != nil {
 		span.RecordError(err)
 		return nil, err

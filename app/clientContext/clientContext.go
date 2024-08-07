@@ -51,7 +51,7 @@ type DatabaseCall struct {
 
 type CacheCall struct {
 	ServiceTransaction
-	Id           string
+	Action       string
 	Key          string
 	Hit          bool
 	ResponseTime time.Duration
@@ -71,5 +71,5 @@ type ClientContext struct {
 	Response    ResponseInfo
 	Downstreams []DownstreamCall
 	Database    []DatabaseCall
-	Cache       CacheCall
+	Cache       []CacheCall
 }

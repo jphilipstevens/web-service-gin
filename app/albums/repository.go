@@ -66,40 +66,9 @@ func (ar *albumRepository) GetAlbums(ctx context.Context, params GetAlbumsParams
 		return nil, db.MapDBError(&sql.ErrNoRows)
 	}
 
-	total, err := ar.countAlbums(ctx, artist)
-	if err != nil {
-		return nil, db.MapDBError(&err)
-	}
-
 	return &db.Paginated[Album]{
 		Items: albums,
-		Total: total,
 	}, nil
-}
-
-func (ar *albumRepository) countAlbums(ctx context.Context, artist string) (int, error) {
-	var count int
-	var query string
-	var args []interface{}
-
-	if artist != "" {
-		query = "SELECT COUNT(*) FROM albums WHERE artist SIMILAR TO $1"
-		args = []interface{}{artist}
-	} else {
-		query = "SELECT COUNT(*) FROM albums"
-		args = nil
-	}
-
-	row, err := ar.dbConn.QueryWithSpan(ctx, serviceName, query, args...)
-	if err != nil {
-		return 0, err
-	}
-
-	if err = row.Scan(&count); err != nil {
-		return 0, err
-	}
-
-	return count, nil
 }
 
 func (ar *albumRepository) Insert(ctx context.Context, album Album) error {

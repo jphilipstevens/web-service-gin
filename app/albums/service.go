@@ -8,6 +8,12 @@ import (
 	"fmt"
 )
 
+const (
+	albumsCacheKeySuffix   = "_albumsArtistFilter"
+	albumsCacheTTLMinutes  = 10
+	albumsCacheServiceName = "albumsCache"
+)
+
 type AlbumService interface {
 	GetAlbums(ctx context.Context, params GetAlbumsParams) (*db.Paginated[Album], error)
 }
@@ -25,8 +31,9 @@ func NewAlbumService(cacher cache.Cacher, albumsRepository AlbumRepository) Albu
 }
 
 func (as *albumService) GetAlbums(ctx context.Context, params GetAlbumsParams) (*db.Paginated[Album], error) {
-	albumSearchCacheKey := fmt.Sprintf("_albumsArtistFilter:%s", params.Artist)
-	cachedAlbums, err := as.cacher.Get(ctx, albumSearchCacheKey)
+
+	albumSearchCacheKey := fmt.Sprintf("%s:%s", albumsCacheKeySuffix, params.Artist)
+	cachedAlbums, err := as.cacher.Get(serviceName, ctx, albumSearchCacheKey)
 	if err == nil && cachedAlbums != "" {
 		var filteredAlbums db.Paginated[Album]
 		marshallError := json.Unmarshal([]byte(cachedAlbums), &filteredAlbums)

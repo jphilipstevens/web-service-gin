@@ -1,13 +1,17 @@
 package cache
 
 import (
-	"context"
+	"example/web-service-gin/testUtils"
 	"strconv"
 	"testing"
 	"time"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/stretchr/testify/assert"
+)
+
+const (
+	serviceName = "testService"
 )
 
 func setupTestRedis(t *testing.T) (*miniredis.Miniredis, Cacher) {
@@ -33,7 +37,6 @@ func TestGet(t *testing.T) {
 	mr, cacher := setupTestRedis(t)
 	defer mr.Close()
 
-	ctx := context.Background()
 	key := "testKey"
 	value := "testValue"
 
@@ -41,20 +44,23 @@ func TestGet(t *testing.T) {
 	mr.Set(key, value)
 
 	t.Run("Test Get", func(t *testing.T) {
-		result, err := cacher.Get(ctx, key)
+		ctx := testUtils.CreateTestContext()
+		result, err := cacher.Get(serviceName, ctx, key)
 		assert.NoError(t, err)
 		assert.Equal(t, value, result)
 	})
 
 	t.Run("Test Get with non-existent key", func(t *testing.T) {
-		result, err := cacher.Get(ctx, "nonExistentKey")
+		ctx := testUtils.CreateTestContext()
+		result, err := cacher.Get(serviceName, ctx, "nonExistentKey")
 		assert.Equal(t, ErrCacheMiss, err)
 		assert.Equal(t, "", result)
 	})
 
 	t.Run("Test Get with Redis error", func(t *testing.T) {
+		ctx := testUtils.CreateTestContext()
 		mr.Close()
-		_, err := cacher.Get(ctx, key)
+		_, err := cacher.Get(serviceName, ctx, key)
 		assert.Equal(t, ErrCacheGeneric, err)
 	})
 
@@ -64,13 +70,13 @@ func TestSet(t *testing.T) {
 	mr, cacher := setupTestRedis(t)
 	defer mr.Close()
 
-	ctx := context.Background()
+	ctx := testUtils.CreateTestContext()
 	key := "testKey"
 	value := "testValue"
 	expiration := time.Minute
 
 	// Test Set
-	err := cacher.Set(ctx, key, value, expiration)
+	err := cacher.Set(serviceName, ctx, key, value, expiration)
 	assert.NoError(t, err)
 
 	// Verify the value was set in Redis
