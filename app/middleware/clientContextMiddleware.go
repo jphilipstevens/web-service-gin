@@ -36,6 +36,10 @@ func ClientContextMiddleware() gin.HandlerFunc {
 				IP:        ip,
 				UserAgent: userAgent,
 			},
+			Request: clientContext.RequestInfo{
+				Method: c.Request.Method,
+				Path:   c.Request.URL.Path,
+			},
 		}
 
 		ctx = context.WithValue(ctx, clientContext.ClientContextKey, &currentContext)

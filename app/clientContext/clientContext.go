@@ -26,12 +26,6 @@ type DownstreamCall struct {
 	CacheId      string
 }
 
-type ServiceInfo struct {
-	Name     string
-	Version  string
-	Instance string
-}
-
 type RequestInfo struct {
 	Method string
 	Path   string
@@ -65,7 +59,6 @@ type ClientContext struct {
 	TraceId     string
 	SpanId      string
 	Client      ClientInfo
-	Service     ServiceInfo
 	Request     RequestInfo
 	Response    ResponseInfo
 	Downstreams []DownstreamCall

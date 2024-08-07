@@ -34,17 +34,18 @@ func JsonLogger() gin.HandlerFunc {
 
 		// Process the users request
 		c.Next()
-
 		writer := c.Writer
-
 		currentContext := c.Request.Context().Value(clientContext.ClientContextKey).(*clientContext.ClientContext)
+		currentContext.Response = clientContext.ResponseInfo{
+			Status: writer.Status(),
+		}
 		entry := LogEntry{
 			Timestamp:     time.Now(),
 			ClientContext: *currentContext,
 		}
 
 		level := logrus.InfoLevel
-		if writer.Status() >= http.StatusInternalServerError {
+		if currentContext.Response.Status >= http.StatusInternalServerError {
 			level = logrus.ErrorLevel
 		}
 
