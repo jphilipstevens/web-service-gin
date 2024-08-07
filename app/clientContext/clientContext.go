@@ -5,7 +5,6 @@ import "time"
 type contextKey string
 
 const (
-	ServiceNameKey   contextKey = "serviceName"
 	ClientContextKey contextKey = "clientContext"
 )
 

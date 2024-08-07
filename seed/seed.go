@@ -2,32 +2,16 @@ package seed
 
 import (
 	"example/web-service-gin/app/db"
+	"example/web-service-gin/config"
 	"fmt"
-
-	"github.com/spf13/viper"
 )
 
 func Init() {
-	viper.SetConfigName("config")
-	viper.AddConfigPath("./config")
-	viper.SetConfigType("yaml")
-
-	// Load configuration
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %w", err))
-	}
-
-	var config struct {
-		DB db.DatabaseConfig `mapstructure:"database"`
-	}
-
-	if err := viper.Unmarshal(&config); err != nil {
-		panic(fmt.Errorf("fatal error config file: %w", err))
-	}
+	config.Init()
+	configFile := config.GetConfig()
 
 	// Initialize database connection
-	dbConn, err := db.ConnectToDB(config.DB)
+	dbConn, err := db.ConnectToDB(configFile.DB)
 	if err != nil {
 		// Handle error
 		panic(fmt.Errorf("failed to connect to database: %w", err))

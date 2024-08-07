@@ -2,14 +2,14 @@ package appTracer
 
 import (
 	"context"
-	"example/web-service-gin/app/clientContext"
+	"example/web-service-gin/config"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 )
 
 func CreateDownstreamSpan(ctx context.Context, serviceName string) (context.Context, trace.Span) {
-	serverName := ctx.Value(clientContext.ServiceNameKey).(string)
+	serverName := config.GetConfig().AppName
 	tracer := otel.Tracer(serverName)
 	spanCtx := trace.SpanContextFromContext(ctx)
 

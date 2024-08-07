@@ -3,7 +3,7 @@ package albums
 import (
 	"context"
 	"example/web-service-gin/app/db"
-	"example/web-service-gin/config"
+	"example/web-service-gin/app/dependencies"
 	"testing"
 	"time"
 
@@ -42,7 +42,7 @@ func TestInit(t *testing.T) {
 
 		router := gin.Default()
 
-		deps := &config.Dependencies{
+		deps := &dependencies.Dependencies{
 			DB:     &database,
 			Cache:  mockCache,
 			Router: router,

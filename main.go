@@ -5,6 +5,7 @@ import (
 	"example/web-service-gin/app/albums"
 	"example/web-service-gin/app/cache"
 	"example/web-service-gin/app/db"
+	"example/web-service-gin/app/dependencies"
 	"example/web-service-gin/app/middleware"
 	"example/web-service-gin/config"
 	"example/web-service-gin/seed"
@@ -18,7 +19,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"github.com/spf13/viper"
 )
 
 func initGracefulShutdown(srv *http.Server) {
@@ -47,24 +47,9 @@ func initGracefulShutdown(srv *http.Server) {
 	logrus.Info("Server exiting")
 }
 func RunApp() {
-	viper.SetConfigName("config")
-	viper.AddConfigPath("./config")
-	viper.SetConfigType("yaml")
 
-	// Load configuration
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %w", err))
-	}
-
-	var configFile struct {
-		Redis cache.RedisClientConfig `mapstructure:"redis"`
-		DB    db.DatabaseConfig       `mapstructure:"database"`
-	}
-
-	if err := viper.Unmarshal(&configFile); err != nil {
-		panic(fmt.Errorf("fatal error config file: %w", err))
-	}
+	config.Init()
+	configFile := config.GetConfig()
 
 	// Initialize Redis client
 	redisClient := cache.NewCacher(configFile.Redis)
@@ -76,10 +61,12 @@ func RunApp() {
 	}
 
 	router := gin.Default()
+	router.Use(middleware.ClientContextMiddleware())
+	router.Use(middleware.TraceMiddleware(configFile.AppName))
 	router.Use(middleware.ErrorHandler)
 	router.Use(middleware.JsonLogger())
 
-	var dependencies = config.Dependencies{
+	var dependencies = dependencies.Dependencies{
 		Cache:  redisClient,
 		DB:     dbConn,
 		Router: router,

@@ -10,7 +10,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func ClientContextMiddleware(serviceName string) gin.HandlerFunc {
+func ClientContextMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
 
@@ -38,7 +38,6 @@ func ClientContextMiddleware(serviceName string) gin.HandlerFunc {
 			},
 		}
 
-		ctx = context.WithValue(ctx, clientContext.ServiceNameKey, serviceName)
 		ctx = context.WithValue(ctx, clientContext.ClientContextKey, &currentContext)
 		c.Request = c.Request.WithContext(ctx)
 

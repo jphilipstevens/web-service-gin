@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"bytes"
+	"example/web-service-gin/app/clientContext"
 	"io"
 	"net/http"
 	"os"
@@ -12,15 +13,8 @@ import (
 )
 
 type LogEntry struct {
-	Timestamp   time.Time     `json:"timestamp"`
-	ClientIP    string        `json:"client_ip"`
-	Method      string        `json:"method"`
-	Path        string        `json:"path"`
-	Protocol    string        `json:"protocol"`
-	UserAgent   string        `json:"user_agent"`
-	StatusCode  int           `json:"status_code"`
-	Latency     time.Duration `json:"latency"`
-	RequestBody string        `json:"request_body"`
+	Timestamp     time.Time                   `json:"timestamp"`
+	ClientContext clientContext.ClientContext `json:"client_context"`
 }
 
 func JsonLogger() gin.HandlerFunc {
@@ -30,7 +24,6 @@ func JsonLogger() gin.HandlerFunc {
 	logrus.SetReportCaller(true)
 
 	return func(c *gin.Context) {
-		startTime := time.Now()
 
 		var requestBody []byte
 		if c.Request.Body != nil {
@@ -44,17 +37,10 @@ func JsonLogger() gin.HandlerFunc {
 
 		writer := c.Writer
 
-		latency := time.Since(startTime)
+		currentContext := c.Request.Context().Value(clientContext.ClientContextKey).(*clientContext.ClientContext)
 		entry := LogEntry{
-			Timestamp:   time.Now(),
-			ClientIP:    c.ClientIP(),
-			Method:      c.Request.Method,
-			Path:        c.Request.URL.Path,
-			Protocol:    c.Request.Proto,
-			UserAgent:   c.Request.UserAgent(),
-			StatusCode:  writer.Status(),
-			Latency:     latency,
-			RequestBody: string(requestBody),
+			Timestamp:     time.Now(),
+			ClientContext: *currentContext,
 		}
 
 		level := logrus.InfoLevel

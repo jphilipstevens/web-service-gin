@@ -1,10 +1,8 @@
 package albums
 
-import (
-	"example/web-service-gin/config"
-)
+import "example/web-service-gin/app/dependencies"
 
-func Init(deps *config.Dependencies) {
+func Init(deps *dependencies.Dependencies) {
 	albumsRepository := NewAlbumRepository(deps.DB)
 	albumService := NewAlbumService(deps.Cache, albumsRepository)
 	albumController := NewAlbumController(albumService)

@@ -5,6 +5,7 @@ import (
 	"example/web-service-gin/app/apiErrors"
 	"example/web-service-gin/app/appTracer"
 	"example/web-service-gin/app/clientContext"
+	"example/web-service-gin/config"
 	"fmt"
 	"time"
 
@@ -12,13 +13,6 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 )
-
-type RedisClientConfig struct {
-	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
-	Password string `mapstructure:"password"`
-	DB       int    `mapstructure:"db"`
-}
 
 type Cacher interface {
 	Get(serviceName string, ctx context.Context, key string) (val string, err error)
@@ -32,7 +26,7 @@ type redisCache struct {
 var ErrCacheMiss = apiErrors.NewNotFoundError("")
 var ErrCacheGeneric = apiErrors.NewGenericError("")
 
-func NewCacher(cfg RedisClientConfig) Cacher {
+func NewCacher(cfg config.RedisClientConfig) Cacher {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
 		Password: cfg.Password,

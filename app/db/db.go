@@ -10,24 +10,15 @@ import (
 
 	"example/web-service-gin/app/appTracer"
 	"example/web-service-gin/app/clientContext"
+	"example/web-service-gin/config"
 )
-
-type DatabaseConfig struct {
-	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
-	User     string `mapstructure:"user"`
-	Password string `mapstructure:"password"`
-
-	DBName  string `mapstructure:"dbname"`
-	SSLMode string `mapstructure:"sslmode"`
-}
 
 type Database struct {
 	Client *sql.DB
 }
 
-func ConnectToDB(config DatabaseConfig) (*Database, error) {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", config.Host, config.Port, config.User, config.Password, config.DBName, config.SSLMode)
+func ConnectToDB(dbConfig config.DatabaseConfig) (*Database, error) {
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.DBName, dbConfig.SSLMode)
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		return nil, err
