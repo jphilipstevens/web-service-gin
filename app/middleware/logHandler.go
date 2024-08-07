@@ -12,11 +12,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type LogEntry struct {
-	Timestamp     time.Time                   `json:"timestamp"`
-	ClientContext clientContext.ClientContext `json:"client_context"`
-}
-
 func JsonLogger() gin.HandlerFunc {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	logrus.SetLevel(logrus.DebugLevel)
@@ -24,6 +19,7 @@ func JsonLogger() gin.HandlerFunc {
 	logrus.SetReportCaller(true)
 
 	return func(c *gin.Context) {
+		startTime := time.Now()
 
 		var requestBody []byte
 		if c.Request.Body != nil {
@@ -34,15 +30,15 @@ func JsonLogger() gin.HandlerFunc {
 
 		// Process the users request
 		c.Next()
+
+		responseTime := time.Since(startTime)
 		writer := c.Writer
-		currentContext := c.Request.Context().Value(clientContext.ClientContextKey).(*clientContext.ClientContext)
-		currentContext.Response = clientContext.ResponseInfo{
+
+		clientContext.AddResponseInfo(c.Request.Context(), clientContext.ResponseInfo{
 			Status: writer.Status(),
-		}
-		entry := LogEntry{
-			Timestamp:     time.Now(),
-			ClientContext: *currentContext,
-		}
+		})
+		clientContext.AddResponseTime(c.Request.Context(), responseTime)
+		currentContext := clientContext.GetClientContext(c.Request.Context())
 
 		level := logrus.InfoLevel
 		if currentContext.Response.Status >= http.StatusInternalServerError {
@@ -51,7 +47,7 @@ func JsonLogger() gin.HandlerFunc {
 
 		// Log the entry as JSON
 		logrus.WithFields(logrus.Fields{
-			"entry": entry,
+			"clientContext": *currentContext,
 		}).Log(level, "Request logged")
 	}
 

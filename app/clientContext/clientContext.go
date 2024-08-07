@@ -1,6 +1,9 @@
 package clientContext
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type contextKey string
 
@@ -56,12 +59,44 @@ type CacheCall struct {
 // request, response, downstream calls, database calls, and cache calls.
 type ClientContext struct {
 	ServiceTransaction
-	TraceId     string
-	SpanId      string
-	Client      ClientInfo
-	Request     RequestInfo
-	Response    ResponseInfo
-	Downstreams []DownstreamCall
-	Database    []DatabaseCall
-	Cache       []CacheCall
+	TraceId      string
+	SpanId       string
+	Client       ClientInfo
+	Request      RequestInfo
+	Response     ResponseInfo
+	Downstreams  []DownstreamCall
+	Database     []DatabaseCall
+	Cache        []CacheCall
+	ResponseTime time.Duration
+}
+
+func GetClientContext(ctx context.Context) *ClientContext {
+	return ctx.Value(ClientContextKey).(*ClientContext)
+}
+
+// since we are saving the client context as a pointer add any modifications to the client context here and handle multiple go routines safely
+
+func AddResponseTime(ctx context.Context, responseTime time.Duration) {
+	currentContext := ctx.Value(ClientContextKey).(*ClientContext)
+	currentContext.ResponseTime = responseTime
+}
+
+func AddResponseInfo(ctx context.Context, response ResponseInfo) {
+	currentContext := ctx.Value(ClientContextKey).(*ClientContext)
+	currentContext.Response = response
+}
+
+func AddDownstreamCall(ctx context.Context, call DownstreamCall) {
+	currentContext := ctx.Value(ClientContextKey).(*ClientContext)
+	currentContext.Downstreams = append(currentContext.Downstreams, call)
+}
+
+func AddDatabaseCall(ctx context.Context, call DatabaseCall) {
+	currentContext := ctx.Value(ClientContextKey).(*ClientContext)
+	currentContext.Database = append(currentContext.Database, call)
+}
+
+func AddCacheCall(ctx context.Context, call CacheCall) {
+	currentContext := ctx.Value(ClientContextKey).(*ClientContext)
+	currentContext.Cache = append(currentContext.Cache, call)
 }

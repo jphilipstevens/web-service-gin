@@ -7,7 +7,6 @@ import (
 
 func CreateTestContext() context.Context {
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, clientContext.ServiceNameKey, "test")
 	currentContext := clientContext.ClientContext{
 		TraceId: "test-trace-id",
 		SpanId:  "test-span-id",

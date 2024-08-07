@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"example/web-service-gin/config"
 	"example/web-service-gin/testUtils"
 	"strconv"
 	"testing"
@@ -25,7 +26,7 @@ func setupTestRedis(t *testing.T) (*miniredis.Miniredis, Cacher) {
 		t.Fatalf("Failed to convert miniredis port to int: %v", err)
 	}
 
-	cfg := RedisClientConfig{
+	cfg := config.RedisClientConfig{
 		Host: mr.Host(),
 		Port: port,
 	}
@@ -34,6 +35,7 @@ func setupTestRedis(t *testing.T) (*miniredis.Miniredis, Cacher) {
 }
 
 func TestGet(t *testing.T) {
+	config.Init()
 	mr, cacher := setupTestRedis(t)
 	defer mr.Close()
 
@@ -67,6 +69,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestSet(t *testing.T) {
+	config.Init()
 	mr, cacher := setupTestRedis(t)
 	defer mr.Close()
 

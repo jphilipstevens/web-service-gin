@@ -6,6 +6,7 @@ import (
 	"example/web-service-gin/app/cache"
 	"example/web-service-gin/app/db"
 	"fmt"
+	"time"
 )
 
 const (
@@ -44,5 +45,12 @@ func (as *albumService) GetAlbums(ctx context.Context, params GetAlbumsParams) (
 
 	// TODO save request to cache for later fetching
 	albums, err := as.albumsRepository.GetAlbums(ctx, params)
+	if err == nil {
+		// TODO save request to cache for later fetching
+		marshalledAlbums, marshallError := json.Marshal(albums)
+		if marshallError == nil {
+			as.cacher.Set(albumsCacheServiceName, ctx, albumSearchCacheKey, string(marshalledAlbums), time.Minute*albumsCacheTTLMinutes)
+		}
+	}
 	return albums, err
 }

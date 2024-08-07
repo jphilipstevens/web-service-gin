@@ -42,7 +42,6 @@ func (rc *redisCache) Get(serviceName string, ctx context.Context, key string) (
 	defer span.End()
 
 	val, err := rc.Client.Get(ctx, key).Result()
-	currentContext := ctx.Value(clientContext.ClientContextKey).(*clientContext.ClientContext)
 	newCacheCall := clientContext.CacheCall{
 		ServiceTransaction: clientContext.ServiceTransaction{
 			ServiceName: serviceName,
@@ -54,8 +53,7 @@ func (rc *redisCache) Get(serviceName string, ctx context.Context, key string) (
 		Error:        err,
 		Hit:          val != "",
 	}
-	currentContext.Cache = append(currentContext.Cache, newCacheCall)
-	_ = context.WithValue(ctx, clientContext.ClientContextKey, currentContext)
+	clientContext.AddCacheCall(ctx, newCacheCall)
 	if err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
@@ -76,7 +74,6 @@ func (rc *redisCache) Set(serviceName string, ctx context.Context, key string, v
 
 	err := rc.Client.Set(ctx, key, value, expiration).Err()
 
-	currentContext := ctx.Value(clientContext.ClientContextKey).(*clientContext.ClientContext)
 	newCacheCall := clientContext.CacheCall{
 		ServiceTransaction: clientContext.ServiceTransaction{
 			ServiceName: serviceName,
@@ -88,8 +85,7 @@ func (rc *redisCache) Set(serviceName string, ctx context.Context, key string, v
 		Error:        err,
 		Hit:          false,
 	}
-	currentContext.Cache = append(currentContext.Cache, newCacheCall)
-	_ = context.WithValue(ctx, clientContext.ClientContextKey, currentContext)
+	clientContext.AddCacheCall(ctx, newCacheCall)
 
 	if err != nil {
 		span.RecordError(err)

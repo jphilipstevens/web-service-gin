@@ -53,7 +53,6 @@ func (db *Database) ExecWithSpan(ctx context.Context, serviceName string, query 
 		return nil, fmt.Errorf("error executing query: %w", err)
 	}
 
-	currentContext := ctx.Value(clientContext.ClientContextKey).(*clientContext.ClientContext)
 	newDatabaseCall := clientContext.DatabaseCall{
 		ServiceTransaction: clientContext.ServiceTransaction{
 			ServiceName: serviceName,
@@ -63,8 +62,7 @@ func (db *Database) ExecWithSpan(ctx context.Context, serviceName string, query 
 		ResponseTime: time.Since(startTime),
 		Error:        err,
 	}
-	currentContext.Database = append(currentContext.Database, newDatabaseCall)
-	_ = context.WithValue(ctx, clientContext.ClientContextKey, currentContext)
+	clientContext.AddDatabaseCall(ctx, newDatabaseCall)
 
 	return result, nil
 }
@@ -80,8 +78,6 @@ func (db *Database) QueryWithSpan(ctx context.Context, serviceName string, query
 		span.RecordError(err)
 		return nil, err
 	}
-
-	currentContext := ctx.Value(clientContext.ClientContextKey).(*clientContext.ClientContext)
 	newDatabaseCall := clientContext.DatabaseCall{
 		ServiceTransaction: clientContext.ServiceTransaction{
 			ServiceName: serviceName,
@@ -91,8 +87,7 @@ func (db *Database) QueryWithSpan(ctx context.Context, serviceName string, query
 		ResponseTime: time.Since(startTime),
 		Error:        err,
 	}
-	currentContext.Database = append(currentContext.Database, newDatabaseCall)
-	_ = context.WithValue(ctx, clientContext.ClientContextKey, currentContext)
+	clientContext.AddDatabaseCall(ctx, newDatabaseCall)
 
 	return rows, nil
 }

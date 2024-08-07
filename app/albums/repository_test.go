@@ -3,6 +3,7 @@ package albums
 import (
 	"database/sql"
 	"example/web-service-gin/app/db"
+	"example/web-service-gin/config"
 	"example/web-service-gin/testUtils"
 	"reflect"
 	"testing"
@@ -22,6 +23,7 @@ func TestNewAlbumRepository(t *testing.T) {
 }
 
 func TestGetAlbumsRepository(t *testing.T) {
+	config.Init()
 
 	t.Run("Get all albums", func(t *testing.T) {
 		mockDB, mock, _ := sqlmock.New()
@@ -85,6 +87,7 @@ func TestGetAlbumsRepository(t *testing.T) {
 }
 
 func TestInsert(t *testing.T) {
+	config.Init()
 	mockDB, mock, _ := sqlmock.New()
 	defer mockDB.Close()
 
@@ -103,6 +106,7 @@ func TestInsert(t *testing.T) {
 }
 
 func TestInsertBatch(t *testing.T) {
+	config.Init()
 	mockDB, mock, _ := sqlmock.New()
 	defer mockDB.Close()
 
@@ -124,6 +128,7 @@ func TestInsertBatch(t *testing.T) {
 }
 
 func TestGetAlbumsNoResults(t *testing.T) {
+	config.Init()
 	mockDB, mock, _ := sqlmock.New()
 	defer mockDB.Close()
 
@@ -145,6 +150,7 @@ func TestGetAlbumsNoResults(t *testing.T) {
 }
 
 func TestGetAlbumsError(t *testing.T) {
+	config.Init()
 	mockDB, mock, _ := sqlmock.New()
 	defer mockDB.Close()
 
@@ -164,6 +170,7 @@ func TestGetAlbumsError(t *testing.T) {
 }
 
 func TestInsertError(t *testing.T) {
+	config.Init()
 	mockDB, mock, _ := sqlmock.New()
 	defer mockDB.Close()
 
@@ -182,6 +189,7 @@ func TestInsertError(t *testing.T) {
 }
 
 func TestInsertBatchEmptySlice(t *testing.T) {
+	config.Init()
 	mockDB, _, _ := sqlmock.New()
 	defer mockDB.Close()
 
@@ -194,6 +202,7 @@ func TestInsertBatchEmptySlice(t *testing.T) {
 }
 
 func TestInsertBatchError(t *testing.T) {
+	config.Init()
 	mockDB, mock, _ := sqlmock.New()
 	defer mockDB.Close()
 
@@ -215,6 +224,7 @@ func TestInsertBatchError(t *testing.T) {
 }
 
 func TestGetAlbumsScanError(t *testing.T) {
+	config.Init()
 	mockDB, mock, _ := sqlmock.New()
 	defer mockDB.Close()
 
