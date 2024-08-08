@@ -7,8 +7,11 @@ redis:
 
 database:
   host: localhost
-  port: 5435
+  port: 5432
   user: albumstoreuser
   password: albumstore
   dbname: album-store
   sslmode: disable
+uptrace:
+  dsn: "http://project2_secret_token@localhost:14317/2"
+  endpoint: "http://localhost:14317"

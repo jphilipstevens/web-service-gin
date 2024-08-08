@@ -2,7 +2,9 @@ package appTracer
 
 import (
 	"context"
+	"example/web-service-gin/config"
 
+	"github.com/uptrace/uptrace-go/uptrace"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -13,28 +15,32 @@ type AppTracer interface {
 
 type appTracerImpl struct {
 	serverName string
+	tracer     trace.Tracer
 }
 
-func NewDownstreamSpan(serverName string) AppTracer {
+func initTracer(configFile config.ConfigFile) (trace.Tracer, error) {
+	uptrace.ConfigureOpentelemetry(
+		uptrace.WithDSN(configFile.Uptrace.DSN),
+		uptrace.WithServiceName(configFile.AppName),
+		uptrace.WithServiceVersion(configFile.AppVersion),
+	)
+
+	return otel.Tracer(configFile.AppName), nil
+}
+
+func NewDownstreamSpan(configFile config.ConfigFile) AppTracer {
+	tracer, err := initTracer(configFile)
+	if err != nil {
+		panic(err)
+	}
 	return &appTracerImpl{
-		serverName: serverName,
+		serverName: configFile.AppName,
+		tracer:     tracer,
 	}
 }
 
 func (d *appTracerImpl) CreateDownstreamSpan(ctx context.Context, serviceName string) (context.Context, trace.Span) {
-	tracer := otel.Tracer(d.serverName)
-	spanCtx := trace.SpanContextFromContext(ctx)
+	_, span := d.tracer.Start(ctx, serviceName)
 
-	// Create a child span with a new span ID
-	newSpanCtx := trace.NewSpanContext(trace.SpanContextConfig{
-		TraceID:    spanCtx.TraceID(),
-		SpanID:     trace.SpanID{},
-		TraceFlags: trace.FlagsSampled,
-		TraceState: trace.TraceState{},
-	})
-
-	ctx, newSpan := tracer.Start(ctx, serviceName,
-		trace.WithLinks(trace.Link{SpanContext: newSpanCtx}),
-	)
-	return ctx, newSpan
+	return ctx, span
 }

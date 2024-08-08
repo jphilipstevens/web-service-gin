@@ -20,6 +20,7 @@ type Database interface {
 	Close()
 }
 
+// Exposed the implementation so that the tests can use it. Not ideal but its hidden by the testUtils package.
 type DatabaseImpl struct {
 	Client    *sql.DB
 	AppTracer appTracer.AppTracer

@@ -1,5 +1,20 @@
 services:
-  postgres:
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.7
+    restart: on-failure
+    environment:
+      CLICKHOUSE_DB: uptrace
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "localhost:8123/ping"]
+      interval: 1s
+      timeout: 1s
+      retries: 30
+    volumes:
+      - ch_data2:/var/lib/clickhouse
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+  app-db:
     image: postgres:alpine
     environment:
       POSTGRES_DB: album-store
@@ -11,14 +26,32 @@ services:
       - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf
       - ./postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
     ports:
-      - 5435:5432
+      - 5432:5432
     restart: on-failure:3
-    networks:
-      - redis-network
+  uptrace-db:
+    image: postgres:alpine
+    restart: on-failure
+    environment:
+      POSTGRES_DB: uptrace
+      POSTGRES_PASSWORD: uptrace
+      POSTGRES_USER: uptrace
+      PGUSER: uptrace
+      PGDATA: /var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-U", "uptrace", "-d", "uptrace"]
+      interval: 1s
+      timeout: 1s
+      retries: 30
+    volumes:
+      - "pg_data2:/var/lib/postgresql/data/pgdata"
+      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./postgres/pg_hba.conf:/etc/postgresql/pg_hba.conf
+    ports:
+      - "5435:5432"
   pgweb:
     image: sosedoff/pgweb
     depends_on:
-      - postgres
+      - app-db
     environment:
       PGWEB_DATABASE_URL: postgres://albumstoreuser:albumstore@postgres:5432/album-store?sslmode=disable
     ports:
@@ -32,8 +65,6 @@ services:
       - redis-config:/usr/local/etc/redis/redis.conf
     ports:
       - 6379:6379
-    networks:
-      - redis-network
   redis-commander:
     image: rediscommander/redis-commander:latest
     environment:
@@ -42,24 +73,46 @@ services:
       - HTTP_PASSWORD=qwerty
     ports:
       - 8081:8081
-    networks:
-      - redis-network
     depends_on:
       - redis
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  uptrace:
+    image: "uptrace/uptrace:1.6.2"
+    #image: 'uptrace/uptrace-dev:latest'
+    restart: on-failure
+    volumes:
+      - ./uptrace.yml:/etc/uptrace/uptrace.yml
+    environment:
+      - DEBUG=2
     ports:
-      - 8080:8080
-    networks:
-      - redis-network
+      - "14317:14317"
+      - "14318:14318"
     depends_on:
-      - redis
-      - postgres
+      clickhouse:
+        condition: service_healthy
+      uptrace-db:
+        condition: service_healthy
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:0.91.0
+    restart: on-failure
+    volumes:
+      - ./config/otel-collector.yaml:/etc/otelcol-contrib/config.yaml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+  vector:
+    image: timberio/vector:0.28.X-alpine
+    volumes:
+      - ./config/vector.toml:/etc/vector/vector.toml:ro
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    restart: on-failure
+    ports:
+      - "8025:8025"
 volumes:
+  ch_data2:
   redis:
   redis-config:
-networks:
-  redis-network:
-    driver: bridge
+  pg_data2:
+# networks:
+#   app-network:
+#     driver: bridge

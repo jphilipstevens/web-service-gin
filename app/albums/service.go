@@ -43,7 +43,6 @@ func (as *albumService) GetAlbums(ctx context.Context, params GetAlbumsParams) (
 		return &filteredAlbums, marshallError
 	}
 
-	// TODO save request to cache for later fetching
 	albums, err := as.albumsRepository.GetAlbums(ctx, params)
 	if err == nil {
 		// TODO save request to cache for later fetching

@@ -20,6 +20,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"github.com/uptrace/uptrace-go/uptrace"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
 func initGracefulShutdown(srv *http.Server) {
@@ -52,8 +54,10 @@ func RunApp() {
 	config.Init()
 	configFile := config.GetConfig()
 
+	defer uptrace.Shutdown(context.Background())
+
 	// Initialize Redis client
-	appTracer := appTracer.NewDownstreamSpan(configFile.AppName)
+	appTracer := appTracer.NewDownstreamSpan(configFile)
 	redisClient := cache.NewCacher(configFile.Redis, appTracer)
 
 	// Initialize database connection
@@ -63,6 +67,7 @@ func RunApp() {
 	}
 
 	router := gin.Default()
+	router.Use(otelgin.Middleware(configFile.AppName))
 	router.Use(middleware.ClientContextMiddleware())
 	router.Use(middleware.TraceMiddleware(configFile.AppName))
 	router.Use(middleware.ErrorHandler)

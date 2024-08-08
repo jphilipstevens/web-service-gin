@@ -23,10 +23,17 @@ type DatabaseConfig struct {
 	SSLMode string `mapstructure:"sslmode"`
 }
 
+type UptraceConfig struct {
+	DSN      string `mapstructure:"dsn"`
+	Endpoint string `mapstructure:"endpoint"`
+}
+
 type ConfigFile struct {
-	AppName string            `mapstructure:"app_name"`
-	Redis   RedisClientConfig `mapstructure:"redis"`
-	DB      DatabaseConfig    `mapstructure:"database"`
+	AppName    string            `mapstructure:"app_name"`
+	AppVersion string            `mapstructure:"app_version"`
+	Redis      RedisClientConfig `mapstructure:"redis"`
+	DB         DatabaseConfig    `mapstructure:"database"`
+	Uptrace    UptraceConfig     `mapstructure:"uptrace"`
 }
 
 var configFile ConfigFile

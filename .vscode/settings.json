@@ -4,12 +4,21 @@
     {
       "previewLimit": 50,
       "server": "127.0.0.1",
-      "port": 5435,
+      "port": 5432,
       "driver": "PostgreSQL",
       "name": "Albums",
       "password": "albumstore",
       "username": "albumstoreuser",
       "database": "album-store"
+    },
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5435,
+      "driver": "PostgreSQL",
+      "name": "uptrace-db",
+      "database": "uptrace",
+      "username": "uptrace"
     }
   ]
 }

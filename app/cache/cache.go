@@ -8,8 +8,10 @@ import (
 	"example/web-service-gin/config"
 	"fmt"
 	"time"
+	"unicode/utf8"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/extra/redisotel/v9"
+	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 )
@@ -33,6 +35,13 @@ func NewCacher(cfg config.RedisClientConfig, appTracer appTracer.AppTracer) Cach
 		Password: cfg.Password,
 		DB:       cfg.DB,
 	})
+
+	if err := redisotel.InstrumentTracing(rdb); err != nil {
+		panic(err)
+	}
+	if err := redisotel.InstrumentMetrics(rdb); err != nil {
+		panic(err)
+	}
 
 	return &redisCache{
 		Client:    rdb,
@@ -58,15 +67,17 @@ func (rc *redisCache) Get(serviceName string, ctx context.Context, key string) (
 		Hit:          val != "",
 	}
 	clientContext.AddCacheCall(ctx, newCacheCall)
-	if err != nil {
+	if err != nil && err != redis.Nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, err.Error())
 		return "", MapCacheError(&err)
 	}
 	span.SetStatus(codes.Ok, "")
+
+	span.SetAttributes(attribute.String("cache.name", "redis"))
 	span.SetAttributes(attribute.String("cache.action", "get"))
 	span.SetAttributes(attribute.String("cache.key", key))
-	span.SetAttributes(attribute.String("cache.value", val))
+	span.SetAttributes(attribute.Int("cache.runeCount.", utf8.RuneCountInString(val)))
 
 	return val, nil
 }
@@ -97,8 +108,11 @@ func (rc *redisCache) Set(serviceName string, ctx context.Context, key string, v
 		return MapCacheError(&err)
 	}
 	span.SetStatus(codes.Ok, "")
+	span.SetAttributes(attribute.String("cache.name", "redis"))
 	span.SetAttributes(attribute.String("cache.action", "set"))
 	span.SetAttributes(attribute.String("cache.key", key))
+	span.SetAttributes(attribute.Int("cache.runeCount.", utf8.RuneCountInString(value)))
+	span.SetAttributes(attribute.Int("cache.expirationSeconds", int(expiration.Seconds())))
 
 	return MapCacheError(&err)
 }
