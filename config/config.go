@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -46,20 +47,24 @@ func GetConfig() ConfigFile {
 	return configFile
 }
 
-func Init() {
+// Config entries can be set in the config file or as environment variables.
+// When set as environment variables, the key should be in the format where the dot notation is replaced with an underscore.
+// For example, the key "redis.host" can be set as the environment variable "REDIS_HOST"
+func Init() error {
 	viper.SetConfigName("config")
 	viper.AddConfigPath("./config")
 	viper.SetConfigType("yaml")
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	// Load configuration
 	err := viper.ReadInConfig()
 	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %w", err))
+		return fmt.Errorf("fatal error config file: %w", err)
 	}
 	configFile = ConfigFile{}
 
 	if err := viper.Unmarshal(&configFile); err != nil {
-		panic(fmt.Errorf("fatal error config file: %w", err))
+		return fmt.Errorf("fatal error config file: %w", err)
 	}
 
 }
