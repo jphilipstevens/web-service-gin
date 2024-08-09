@@ -3,8 +3,8 @@ package seed
 import (
 	"context"
 	"database/sql"
-	"example/web-service-gin/app/albums"
 	"example/web-service-gin/app/db"
+	"example/web-service-gin/features/albums"
 	"fmt"
 )
 
