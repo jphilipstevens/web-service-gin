@@ -3,6 +3,8 @@ module example/web-service-gin
 go 1.22.5
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
+	github.com/alicebob/miniredis/v2 v2.33.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/redis/go-redis/extra/redisotel/v9 v9.5.3
 	github.com/redis/go-redis/v9 v9.6.1
@@ -10,14 +12,13 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
 	github.com/uptrace/uptrace-go v1.27.1
+	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.53.0
 	go.opentelemetry.io/otel v1.28.0
 	go.opentelemetry.io/otel/trace v1.28.0
 )
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.2 // indirect
 	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
-	github.com/alicebob/miniredis/v2 v2.33.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
@@ -39,12 +40,10 @@ require (
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect
-	go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.53.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.52.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp v0.3.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.27.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.28.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.28.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.27.0 // indirect
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.27.0 // indirect
 	go.opentelemetry.io/otel/log v0.3.0 // indirect
@@ -74,7 +73,6 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.22.0 // indirect
-	github.com/go-redis/redis/v8 v8.11.5
 	github.com/goccy/go-json v0.10.3 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.8 // indirect

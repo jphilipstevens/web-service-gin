@@ -1,3 +1,6 @@
+/*
+This file contains utility functions for testing. Mostly used to make mock and stub calls easier.
+*/
 package testUtils
 
 import (
@@ -27,7 +30,7 @@ func CreateTestContext() context.Context {
 type dummyAppTracer struct {
 }
 
-func (d *dummyAppTracer) CreateDownstreamSpan(ctx context.Context, serviceName string) (context.Context, trace.Span) {
+func (d *dummyAppTracer) CreateSpan(ctx context.Context, serviceName string) (context.Context, trace.Span) {
 	return ctx, nil
 }
 

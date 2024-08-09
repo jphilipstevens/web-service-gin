@@ -30,8 +30,10 @@
 ## TODOs
 
 - [ ] Add swagger
+- [ ] add versioning
 - [ ] Add tests
 - [x] logger
 - [x] graceful shutdown
 - [x] create a docker image
+- [x] add tracing and metrics
 - [ ] CI/CD

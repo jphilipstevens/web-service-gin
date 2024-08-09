@@ -63,7 +63,7 @@ func RunApp() {
 	configFile := config.GetConfig()
 
 	// Initialize Redis client
-	appTracer := appTracer.NewDownstreamSpan(configFile)
+	appTracer := appTracer.NewAppTracer(configFile)
 	defer uptrace.Shutdown(context.Background())
 	redisClient := cache.NewCacher(configFile.Redis, appTracer)
 

@@ -58,7 +58,7 @@ func (db *DatabaseImpl) GetClient() *sql.DB {
 // ExecContext executes a SQL query with tracing and returns the result.
 func (db *DatabaseImpl) ExecContext(serviceName string, ctx context.Context, query string, args ...any) (*sql.Result, error) {
 	startTime := time.Now()
-	spanCtx, span := db.AppTracer.CreateDownstreamSpan(ctx, serviceName)
+	spanCtx, span := db.AppTracer.CreateSpan(ctx, serviceName)
 	defer span.End()
 
 	result, err := db.Client.ExecContext(spanCtx, query, args...)
@@ -84,7 +84,7 @@ func (db *DatabaseImpl) ExecContext(serviceName string, ctx context.Context, que
 // QueryContext executes a query with a new span and saves results to ClientContext
 func (db *DatabaseImpl) QueryContext(serviceName string, ctx context.Context, query string, args ...any) (*sql.Rows, error) {
 	startTime := time.Now()
-	spanCtx, span := db.AppTracer.CreateDownstreamSpan(ctx, serviceName)
+	spanCtx, span := db.AppTracer.CreateSpan(ctx, serviceName)
 	defer span.End()
 
 	rows, err := db.Client.QueryContext(spanCtx, query, args...)
