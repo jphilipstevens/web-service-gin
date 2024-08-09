@@ -5,53 +5,103 @@ import (
 	"time"
 )
 
+// ClientContext represents the client context that holds information about the client making the request.
 type contextKey string
 
+// ClientContextKey is the key used to store and retrieve the client context from the context.
 const (
 	ClientContextKey contextKey = "clientContext"
 )
 
+// ServiceTransaction represents a transaction within a service.
+// It contains information about the service name and span ID.
 type ServiceTransaction struct {
+	// ServiceName is the name of the service involved in the transaction.
 	ServiceName string
-	SpanId      string
+
+	// SpanId is the unique identifier for this specific span of the transaction.
+	SpanId string
 }
 
+// ClientInfo represents information about the client making the request.
+// It contains the client's IP address and User-Agent string.
 type ClientInfo struct {
-	IP        string
+	// IP is the IP address of the client.
+	IP string
+
+	// UserAgent is the User-Agent string provided by the client's browser or application.
 	UserAgent string
 }
 
+// DownstreamCall represents a call made to a downstream service.
+// It contains information about the service transaction, response time,
+// status code, error (if any), and cache ID.
 type DownstreamCall struct {
+	// ServiceTransaction contains information about the service and span ID.
 	ServiceTransaction
+
+	// ResponseTime is the duration it took for the downstream call to complete.
 	ResponseTime time.Duration
-	StatusCode   int
-	Error        error
-	CacheId      string
+
+	// StatusCode is the HTTP status code returned by the downstream service.
+	StatusCode int
+
+	// Error holds any error that occurred during the downstream call.
+	Error error
+
+	// CacheId is the identifier for any cache associated with this call.
+	CacheId string
 }
 
+// RequestInfo represents information about the incoming HTTP request.
 type RequestInfo struct {
+	// Method is the HTTP method used for the request (e.g., GET, POST, PUT, DELETE).
 	Method string
-	Path   string
+
+	// Path is the requested URL path.
+	Path string
 }
 
+// ResponseInfo represents information about the HTTP response.
 type ResponseInfo struct {
+	// Status is the HTTP status code of the response.
 	Status int
 }
 
+// DatabaseCall represents a call made to a database.
 type DatabaseCall struct {
+	// ServiceTransaction contains information about the service and span ID.
 	ServiceTransaction
-	Query        string
+
+	// Query is the SQL query or operation executed on the database.
+	Query string
+
+	// ResponseTime is the duration it took for the database call to complete.
 	ResponseTime time.Duration
-	Error        error
+
+	// Error holds any error that occurred during the database call.
+	Error error
 }
 
+// CacheCall represents a call made to a cache service.
 type CacheCall struct {
+	// ServiceTransaction contains information about the service and span ID.
 	ServiceTransaction
-	Action       string
-	Key          string
-	Hit          bool
+
+	// Action is the type of operation performed on the cache (e.g., GET, SET, DELETE).
+	Action string
+
+	// Key is the identifier used to access the cached data.
+	Key string
+
+	// Hit indicates whether the cache lookup was successful (true) or not (false).
+	Hit bool
+
+	// ResponseTime is the duration it took for the cache call to complete.
 	ResponseTime time.Duration
-	Error        error
+
+	// Error holds any error that occurred during the cache call.
+	Error error
 }
 
 // ClientContext represents the context information for a client request.

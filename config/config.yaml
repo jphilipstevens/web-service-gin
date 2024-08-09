@@ -18,6 +18,7 @@ database:
   password: albumstore
   dbname: album-store
   sslmode: disable
+  driver: postgres
 
 uptrace:
   dsn: "http://project2_secret_token@localhost:14317/2"

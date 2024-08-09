@@ -24,6 +24,7 @@ type DatabaseConfig struct {
 	Port     int    `mapstructure:"port"`
 	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password"`
+	Driver   string `mapstructure:"driver"`
 
 	DBName  string `mapstructure:"dbname"`
 	SSLMode string `mapstructure:"sslmode"`
