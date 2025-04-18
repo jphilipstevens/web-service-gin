@@ -2,8 +2,9 @@ package db
 
 import (
 	"database/sql"
-	"jphilipstevens/web-service-gin/app/apiErrors"
 	"net/http"
+
+	"github.com/jphilipstevens/web-service-gin/app/apiErrors"
 )
 
 const (

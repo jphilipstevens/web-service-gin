@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"jphilipstevens/web-service-gin/app/db"
-	"jphilipstevens/web-service-gin/example/features/albums"
-	"jphilipstevens/web-service-gin/testUtils"
+
+	"github.com/jphilipstevens/web-service-gin/app/db"
+	"github.com/jphilipstevens/web-service-gin/example/features/albums"
+	"github.com/jphilipstevens/web-service-gin/testUtils"
 )
 
 var data = []albums.Album{

@@ -3,8 +3,9 @@ package middleware
 import (
 	"context"
 
-	"jphilipstevens/web-service-gin/app/clientContext"
 	"strings"
+
+	"github.com/jphilipstevens/web-service-gin/app/clientContext"
 
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel/trace"

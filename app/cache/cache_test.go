@@ -1,11 +1,12 @@
 package cache
 
 import (
-	"jphilipstevens/web-service-gin/config"
-	"jphilipstevens/web-service-gin/testUtils"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/jphilipstevens/web-service-gin/config"
+	"github.com/jphilipstevens/web-service-gin/testUtils"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/stretchr/testify/assert"

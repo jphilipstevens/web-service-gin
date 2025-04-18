@@ -2,10 +2,11 @@ package albums
 
 import (
 	"context"
-	"jphilipstevens/web-service-gin/app/db"
-	"jphilipstevens/web-service-gin/app/dependencies"
 	"testing"
 	"time"
+
+	"github.com/jphilipstevens/web-service-gin/app/db"
+	"github.com/jphilipstevens/web-service-gin/app/dependencies"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/gin-gonic/gin"

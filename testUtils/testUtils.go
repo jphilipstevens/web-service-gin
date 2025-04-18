@@ -4,11 +4,12 @@ This file contains utility functions for testing. Mostly used to make mock and s
 package testUtils
 
 import (
-	"jphilipstevens/web-service-gin/app/appTracer"
-	"jphilipstevens/web-service-gin/app/clientContext"
-	"jphilipstevens/web-service-gin/app/db"
 	"context"
 	"database/sql"
+
+	"github.com/jphilipstevens/web-service-gin/app/appTracer"
+	"github.com/jphilipstevens/web-service-gin/app/clientContext"
+	"github.com/jphilipstevens/web-service-gin/app/db"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"

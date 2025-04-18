@@ -8,9 +8,9 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"jphilipstevens/web-service-gin/app/appTracer"
-	"jphilipstevens/web-service-gin/app/clientContext"
-	"jphilipstevens/web-service-gin/config"
+	"github.com/jphilipstevens/web-service-gin/app/appTracer"
+	"github.com/jphilipstevens/web-service-gin/app/clientContext"
+	"github.com/jphilipstevens/web-service-gin/config"
 )
 
 // Database interface defines methods for interacting with the database.

@@ -19,7 +19,7 @@ build-example:
 
 build_with_new_version:
 	./scripts/version.sh patch 
-	$(GOBUILD) -ldflags "-X jphilipstevens/web-service-gin/app/version.Version=$(shell cat $(VERSION_FILE))" -o $(BINARY_NAME) -v $(MAIN_PATH)
+	$(GOBUILD) -ldflags "-X github.com/jphilipstevens/web-service-gin/app/version.Version=$(shell cat $(VERSION_FILE))" -o $(BINARY_NAME) -v $(MAIN_PATH)
 
 test:
 	$(GOTEST) -v ./app/...

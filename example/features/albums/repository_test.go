@@ -2,11 +2,12 @@ package albums
 
 import (
 	"database/sql"
-	"jphilipstevens/web-service-gin/app/db"
-	"jphilipstevens/web-service-gin/config"
-	"jphilipstevens/web-service-gin/testUtils"
 	"reflect"
 	"testing"
+
+	"github.com/jphilipstevens/web-service-gin/app/db"
+	"github.com/jphilipstevens/web-service-gin/config"
+	"github.com/jphilipstevens/web-service-gin/testUtils"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"

@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"jphilipstevens/web-service-gin/app/db"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/jphilipstevens/web-service-gin/app/db"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"

@@ -3,10 +3,11 @@ package middleware
 import (
 	"bytes"
 	"io"
-	"jphilipstevens/web-service-gin/app/clientContext"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/jphilipstevens/web-service-gin/app/clientContext"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"

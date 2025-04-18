@@ -2,9 +2,10 @@ package seed
 
 import (
 	"fmt"
-	"jphilipstevens/web-service-gin/app/db"
-	"jphilipstevens/web-service-gin/config"
-	"jphilipstevens/web-service-gin/testUtils"
+
+	"github.com/jphilipstevens/web-service-gin/app/db"
+	"github.com/jphilipstevens/web-service-gin/config"
+	"github.com/jphilipstevens/web-service-gin/testUtils"
 )
 
 func Init() {

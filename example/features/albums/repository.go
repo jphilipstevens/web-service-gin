@@ -4,8 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"jphilipstevens/web-service-gin/app/db"
 	"strings"
+
+	"github.com/jphilipstevens/web-service-gin/app/db"
 )
 
 const (

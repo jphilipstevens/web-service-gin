@@ -1,4 +1,4 @@
-module jphilipstevens/web-service-gin
+module github.com/jphilipstevens/web-service-gin
 
 go 1.22.5
 

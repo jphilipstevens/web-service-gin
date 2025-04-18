@@ -3,12 +3,13 @@ package cache
 import (
 	"context"
 	"fmt"
-	"jphilipstevens/web-service-gin/app/apiErrors"
-	"jphilipstevens/web-service-gin/app/appTracer"
-	"jphilipstevens/web-service-gin/app/clientContext"
-	"jphilipstevens/web-service-gin/config"
 	"time"
 	"unicode/utf8"
+
+	"github.com/jphilipstevens/web-service-gin/app/apiErrors"
+	"github.com/jphilipstevens/web-service-gin/app/appTracer"
+	"github.com/jphilipstevens/web-service-gin/app/clientContext"
+	"github.com/jphilipstevens/web-service-gin/config"
 
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"

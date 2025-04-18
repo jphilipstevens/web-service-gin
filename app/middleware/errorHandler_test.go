@@ -1,10 +1,11 @@
 package middleware
 
 import (
-	"jphilipstevens/web-service-gin/app/apiErrors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/jphilipstevens/web-service-gin/app/apiErrors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"

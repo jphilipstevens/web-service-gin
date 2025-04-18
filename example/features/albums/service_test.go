@@ -3,10 +3,11 @@ package albums
 import (
 	"context"
 	"encoding/json"
-	"jphilipstevens/web-service-gin/app/cache"
-	"jphilipstevens/web-service-gin/app/db"
 	"testing"
 	"time"
+
+	"github.com/jphilipstevens/web-service-gin/app/cache"
+	"github.com/jphilipstevens/web-service-gin/app/db"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

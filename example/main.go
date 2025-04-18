@@ -2,11 +2,12 @@ package main
 
 import (
 	"flag"
-	"jphilipstevens/web-service-gin/app"
-	"jphilipstevens/web-service-gin/config"
-	"jphilipstevens/web-service-gin/example/features/albums"
-	"jphilipstevens/web-service-gin/example/seed"
 	"os"
+
+	"github.com/jphilipstevens/web-service-gin/app"
+	"github.com/jphilipstevens/web-service-gin/config"
+	"github.com/jphilipstevens/web-service-gin/example/features/albums"
+	"github.com/jphilipstevens/web-service-gin/example/seed"
 )
 
 func RunApp() {

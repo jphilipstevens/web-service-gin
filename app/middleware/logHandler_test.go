@@ -3,12 +3,13 @@ package middleware
 import (
 	"bytes"
 	"encoding/json"
-	"jphilipstevens/web-service-gin/app/clientContext"
-	"jphilipstevens/web-service-gin/testUtils"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/jphilipstevens/web-service-gin/app/clientContext"
+	"github.com/jphilipstevens/web-service-gin/testUtils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"

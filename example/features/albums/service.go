@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"jphilipstevens/web-service-gin/app/cache"
-	"jphilipstevens/web-service-gin/app/db"
 	"time"
+
+	"github.com/jphilipstevens/web-service-gin/app/cache"
+	"github.com/jphilipstevens/web-service-gin/app/db"
 )
 
 const (
