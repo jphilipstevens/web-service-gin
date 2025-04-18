@@ -1,9 +1,9 @@
 package dependencies
 
 import (
-	"example/web-service-gin/app/appTracer"
-	"example/web-service-gin/app/cache"
-	"example/web-service-gin/app/db"
+	"jphilipstevens/web-service-gin/app/appTracer"
+	"jphilipstevens/web-service-gin/app/cache"
+	"jphilipstevens/web-service-gin/app/db"
 
 	"github.com/gin-gonic/gin"
 )

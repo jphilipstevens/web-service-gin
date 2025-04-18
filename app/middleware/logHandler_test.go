@@ -3,8 +3,8 @@ package middleware
 import (
 	"bytes"
 	"encoding/json"
-	"example/web-service-gin/app/clientContext"
-	"example/web-service-gin/testUtils"
+	"jphilipstevens/web-service-gin/app/clientContext"
+	"jphilipstevens/web-service-gin/testUtils"
 	"net/http"
 	"net/http/httptest"
 	"strings"

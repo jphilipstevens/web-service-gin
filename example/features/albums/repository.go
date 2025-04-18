@@ -3,8 +3,8 @@ package albums
 import (
 	"context"
 	"database/sql"
-	"example/web-service-gin/app/db"
 	"fmt"
+	"jphilipstevens/web-service-gin/app/db"
 	"strings"
 )
 

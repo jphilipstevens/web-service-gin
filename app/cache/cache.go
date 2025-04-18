@@ -2,11 +2,11 @@ package cache
 
 import (
 	"context"
-	"example/web-service-gin/app/apiErrors"
-	"example/web-service-gin/app/appTracer"
-	"example/web-service-gin/app/clientContext"
-	"example/web-service-gin/config"
 	"fmt"
+	"jphilipstevens/web-service-gin/app/apiErrors"
+	"jphilipstevens/web-service-gin/app/appTracer"
+	"jphilipstevens/web-service-gin/app/clientContext"
+	"jphilipstevens/web-service-gin/config"
 	"time"
 	"unicode/utf8"
 

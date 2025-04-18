@@ -43,6 +43,12 @@ type ConfigFile struct {
 	Server  ServerConfig      `mapstructure:"server"`
 }
 
+type ConfigOptions struct {
+	Path string
+	Name string
+	Type string // optional: json, yaml, toml
+}
+
 var configFile ConfigFile
 
 func GetConfig() ConfigFile {
@@ -56,10 +62,14 @@ func GetConfig() ConfigFile {
 // Config entries can be set in the config file or as environment variables.
 // When set as environment variables, the key should be in the format where the dot notation is replaced with an underscore.
 // For example, the key "redis.host" can be set as the environment variable "REDIS_HOST"
-func Init() error {
-	viper.SetConfigName("config")
-	viper.AddConfigPath("./config")
-	viper.SetConfigType("yaml")
+func Init(opts ConfigOptions) error {
+	viper.SetConfigName(opts.Name)
+	viper.AddConfigPath(opts.Path)
+
+	if opts.Type != "" {
+		viper.SetConfigType(opts.Type)
+	}
+
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
 	// Load configuration

@@ -5,17 +5,21 @@ GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 BINARY_NAME=./bin/web-service-gin
-MAIN_PATH=./main.go
+MAIN_PATH=./example/main.go
 VERSION_FILE=version.txt
 
 all: build
 
+# Ensure the lib compiles (optional safety net)
 build:
+	go build ./...
+
+build-example:
 	$(GOBUILD) -o $(BINARY_NAME) -v $(MAIN_PATH)
 
 build_with_new_version:
 	./scripts/version.sh patch 
-	$(GOBUILD) -ldflags "-X example/web-service-gin/app/version.Version=$(shell cat $(VERSION_FILE))" -o $(BINARY_NAME) -v $(MAIN_PATH)
+	$(GOBUILD) -ldflags "-X jphilipstevens/web-service-gin/app/version.Version=$(shell cat $(VERSION_FILE))" -o $(BINARY_NAME) -v $(MAIN_PATH)
 
 test:
 	$(GOTEST) -v ./app/...

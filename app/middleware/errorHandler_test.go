@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"example/web-service-gin/app/apiErrors"
+	"jphilipstevens/web-service-gin/app/apiErrors"
 	"net/http"
 	"net/http/httptest"
 	"testing"

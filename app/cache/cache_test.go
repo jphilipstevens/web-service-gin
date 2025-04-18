@@ -1,8 +1,8 @@
 package cache
 
 import (
-	"example/web-service-gin/config"
-	"example/web-service-gin/testUtils"
+	"jphilipstevens/web-service-gin/config"
+	"jphilipstevens/web-service-gin/testUtils"
 	"strconv"
 	"testing"
 	"time"

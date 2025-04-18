@@ -1,14 +1,18 @@
 package seed
 
 import (
-	"example/web-service-gin/app/db"
-	"example/web-service-gin/config"
-	"example/web-service-gin/testUtils"
 	"fmt"
+	"jphilipstevens/web-service-gin/app/db"
+	"jphilipstevens/web-service-gin/config"
+	"jphilipstevens/web-service-gin/testUtils"
 )
 
 func Init() {
-	config.Init()
+	config.Init(config.ConfigOptions{
+		Path: "./example/config", // or from ENV, flags, etc
+		Name: "config",           // without extension
+		Type: "yaml",             // optional
+	})
 	configFile := config.GetConfig()
 
 	// Initialize database connection

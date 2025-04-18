@@ -4,12 +4,13 @@ This file contains utility functions for testing. Mostly used to make mock and s
 package testUtils
 
 import (
+	"jphilipstevens/web-service-gin/app/appTracer"
+	"jphilipstevens/web-service-gin/app/clientContext"
+	"jphilipstevens/web-service-gin/app/db"
 	"context"
 	"database/sql"
-	"example/web-service-gin/app/appTracer"
-	"example/web-service-gin/app/clientContext"
-	"example/web-service-gin/app/db"
 
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -27,11 +28,12 @@ func CreateTestContext() context.Context {
 	return ctx
 }
 
-type dummyAppTracer struct {
-}
+// dummyAppTracer now returns a NoOpSpan instead of nil
+type dummyAppTracer struct{}
 
 func (d *dummyAppTracer) CreateSpan(ctx context.Context, serviceName string) (context.Context, trace.Span) {
-	return ctx, nil
+	tracer := otel.GetTracerProvider().Tracer("test")
+	return tracer.Start(ctx, serviceName)
 }
 
 func NewAppTracer() appTracer.AppTracer {

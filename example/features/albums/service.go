@@ -3,9 +3,9 @@ package albums
 import (
 	"context"
 	"encoding/json"
-	"example/web-service-gin/app/cache"
-	"example/web-service-gin/app/db"
 	"fmt"
+	"jphilipstevens/web-service-gin/app/cache"
+	"jphilipstevens/web-service-gin/app/db"
 	"time"
 )
 

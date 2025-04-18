@@ -2,7 +2,7 @@ package db
 
 import (
 	"database/sql"
-	"example/web-service-gin/app/apiErrors"
+	"jphilipstevens/web-service-gin/app/apiErrors"
 	"net/http"
 )
 

@@ -2,13 +2,13 @@ package app
 
 import (
 	"context"
-	"example/web-service-gin/app/appTracer"
-	"example/web-service-gin/app/cache"
-	"example/web-service-gin/app/db"
-	"example/web-service-gin/app/dependencies"
-	"example/web-service-gin/app/middleware"
-	"example/web-service-gin/config"
 	"fmt"
+	"jphilipstevens/web-service-gin/app/appTracer"
+	"jphilipstevens/web-service-gin/app/cache"
+	"jphilipstevens/web-service-gin/app/db"
+	"jphilipstevens/web-service-gin/app/dependencies"
+	"jphilipstevens/web-service-gin/app/middleware"
+	"jphilipstevens/web-service-gin/config"
 	"net/http"
 	"os"
 	"os/signal"
@@ -71,14 +71,16 @@ func initGracefulShutdown(srv *http.Server) {
 //   - DB is postgres
 //   - Cache is redis
 //   - Router is gin.Default()
+//   - configOptions is the config path info
 type ServerParams struct {
-	Routes       RouterFunc
-	Dependencies *dependencies.Dependencies
+	Routes        RouterFunc
+	Dependencies  *dependencies.Dependencies
+	ConfigOptions config.ConfigOptions
 }
 
 func RunServer(ServerParams ServerParams) {
 
-	err := config.Init()
+	err := config.Init(ServerParams.ConfigOptions)
 	if err != nil {
 		panic(err)
 	}

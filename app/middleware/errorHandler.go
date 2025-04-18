@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"errors"
-	"example/web-service-gin/app/apiErrors"
+	"jphilipstevens/web-service-gin/app/apiErrors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

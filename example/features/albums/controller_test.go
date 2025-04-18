@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"example/web-service-gin/app/db"
+	"jphilipstevens/web-service-gin/app/db"
 	"net/http"
 	"net/http/httptest"
 	"testing"

@@ -2,8 +2,8 @@ package albums
 
 import (
 	"context"
-	"example/web-service-gin/app/db"
-	"example/web-service-gin/app/dependencies"
+	"jphilipstevens/web-service-gin/app/db"
+	"jphilipstevens/web-service-gin/app/dependencies"
 	"testing"
 	"time"
 

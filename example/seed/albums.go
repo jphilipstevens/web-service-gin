@@ -3,9 +3,10 @@ package seed
 import (
 	"context"
 	"database/sql"
-	"example/web-service-gin/app/db"
-	"example/web-service-gin/features/albums"
 	"fmt"
+	"jphilipstevens/web-service-gin/app/db"
+	"jphilipstevens/web-service-gin/example/features/albums"
+	"jphilipstevens/web-service-gin/testUtils"
 )
 
 var data = []albums.Album{
@@ -44,19 +45,20 @@ func createAlbumsTable(ctx context.Context, db *sql.DB) error {
 }
 
 func SeedAlbums(dbConn db.Database) error {
+	ctx := testUtils.CreateTestContext()
 	// Create the albums table if it doesn't exist
-	if err := createAlbumsTable(context.Background(), dbConn.GetClient()); err != nil {
+	if err := createAlbumsTable(ctx, dbConn.GetClient()); err != nil {
 		return fmt.Errorf("fatal error cannot create Album Table: %w", err)
 	}
 
-	albumsRepository := albums.NewAlbumRepository(dbConn)
+	contractsRepository := albums.NewAlbumRepository(dbConn)
 
-	_, err := dbConn.GetClient().ExecContext(context.Background(), "TRUNCATE TABLE albums")
+	_, err := dbConn.GetClient().ExecContext(ctx, "TRUNCATE TABLE contracts")
 	if err != nil {
 		return fmt.Errorf("failed to truncate table: %w", err)
 	}
 
-	err = albumsRepository.InsertBatch(context.Background(), data)
+	err = contractsRepository.InsertBatch(ctx, data)
 	if err != nil {
 		return fmt.Errorf("failed to insert album: %w", err)
 	}

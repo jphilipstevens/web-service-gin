@@ -1,6 +1,6 @@
 package albums
 
-import "example/web-service-gin/app/dependencies"
+import "jphilipstevens/web-service-gin/app/dependencies"
 
 func Init(deps *dependencies.Dependencies) {
 	albumsRepository := NewAlbumRepository(deps.DB)

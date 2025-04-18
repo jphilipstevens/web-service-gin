@@ -2,9 +2,9 @@ package albums
 
 import (
 	"database/sql"
-	"example/web-service-gin/app/db"
-	"example/web-service-gin/config"
-	"example/web-service-gin/testUtils"
+	"jphilipstevens/web-service-gin/app/db"
+	"jphilipstevens/web-service-gin/config"
+	"jphilipstevens/web-service-gin/testUtils"
 	"reflect"
 	"testing"
 

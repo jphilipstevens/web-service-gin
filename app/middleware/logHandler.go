@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"bytes"
-	"example/web-service-gin/app/clientContext"
 	"io"
+	"jphilipstevens/web-service-gin/app/clientContext"
 	"net/http"
 	"os"
 	"time"

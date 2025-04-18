@@ -3,7 +3,7 @@ package middleware
 import (
 	"context"
 
-	"example/web-service-gin/app/clientContext"
+	"jphilipstevens/web-service-gin/app/clientContext"
 	"strings"
 
 	"github.com/gin-gonic/gin"
