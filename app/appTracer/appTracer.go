@@ -17,6 +17,7 @@ import (
 // AppTracer is an interface for creating spans based on the current context.
 type AppTracer interface {
 	CreateSpan(ctx context.Context, serviceName string) (context.Context, trace.Span)
+	Shutdown(ctx context.Context) error
 }
 
 type appTracerImpl struct {
@@ -53,4 +54,8 @@ func (d *appTracerImpl) CreateSpan(ctx context.Context, serviceName string) (con
 	_, span := d.tracer.Start(ctx, serviceName)
 
 	return ctx, span
+}
+
+func (d *appTracerImpl) Shutdown(ctx context.Context) error {
+	return uptrace.Shutdown(ctx)
 }

@@ -18,7 +18,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"github.com/uptrace/uptrace-go/uptrace"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
@@ -89,7 +88,7 @@ func RunServer(ServerParams ServerParams) {
 
 	// Initialize Redis client
 	appTracer := appTracer.NewAppTracer(configFile)
-	defer uptrace.Shutdown(context.Background())
+	defer appTracer.Shutdown(context.Background())
 	redisClient := cache.NewCacher(configFile.Redis, appTracer)
 
 	// Initialize database connection
