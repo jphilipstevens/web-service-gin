@@ -8,40 +8,51 @@ BINARY_NAME=./bin/web-service-gin
 MAIN_PATH=./example/main.go
 VERSION_FILE=version.txt
 
-all: build
+all: build ## Default: Ensure library compiles (safe check)
 
-# Ensure the lib compiles (optional safety net)
-build:
+# 🛠️ Build
+build: ## Build the entire library (no binary output)
 	go build ./...
 
-build-example:
+build-example: ## Build the example binary
 	$(GOBUILD) -o $(BINARY_NAME) -v $(MAIN_PATH)
 
-build_with_new_version:
+build_with_new_version: ## Patch version + build binary with embedded version string
 	./scripts/version.sh patch 
 	$(GOBUILD) -ldflags "-X github.com/jphilipstevens/web-service-gin/app/version.Version=$(shell cat $(VERSION_FILE))" -o $(BINARY_NAME) -v $(MAIN_PATH)
 
-test:
+# 🧪 Test & Coverage
+test: ## Run unit tests
 	$(GOTEST) -v ./app/...
 
-coverage:
+coverage: ## Run tests with coverage output in HTML
 	$(GOTEST) -coverprofile=coverage.out ./...
 	$(GOCMD) tool cover -html=coverage.out -o coverage.html
 
-clean:
+# 🧹 Clean up
+clean: ## Remove binary and coverage output files
 	$(GOCLEAN)
 	rm -f $(BINARY_NAME)
 	rm -f coverage.out
 	rm -f coverage.html
 
-run:
+# 🚀 Run
+run: ## Build and run the example binary
 	$(GOBUILD) -o $(BINARY_NAME) -v $(MAIN_PATH)
 	./$(BINARY_NAME)
 
-deps:
+# 📦 Dependency management
+deps: ## Download Go module dependencies
 	$(GOGET) -v -t -d ./...
 
-seed:
+# 🌱 Data Seeding
+seed: ## Run the Go-based seeder script
 	$(GOCMD) run ./scripts/seed.go
 
-.PHONY: all build test coverage clean run deps seed
+# 📘 Help Menu
+help: ## Show this help message
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
+		| awk 'BEGIN {FS = ":.*?## "}; {printf "🛠  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
+
+.PHONY: all build build-example build_with_new_version \
+        test coverage clean run deps seed help
