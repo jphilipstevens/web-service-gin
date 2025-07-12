@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -62,13 +64,42 @@ func GetConfig() ConfigFile {
 // Config entries can be set in the config file or as environment variables.
 // When set as environment variables, the key should be in the format where the dot notation is replaced with an underscore.
 // For example, the key "redis.host" can be set as the environment variable "REDIS_HOST"
-func Init(opts ConfigOptions) error {
-	viper.SetConfigName(opts.Name)
-	viper.AddConfigPath(opts.Path)
-
-	if opts.Type != "" {
-		viper.SetConfigType(opts.Type)
+func Init(opts ...ConfigOptions) error {
+	o := ConfigOptions{}
+	if len(opts) > 0 {
+		o = opts[0]
 	}
+
+	if o.Path == "" {
+		// attempt to locate example config for tests
+		possible := []string{
+			"example/config",
+			"../example/config",
+			"../../example/config",
+			"../../../example/config",
+			"config",
+			"../config",
+		}
+		for _, p := range possible {
+			if _, err := os.Stat(filepath.Join(p, "config.yaml")); err == nil {
+				o.Path = p
+				break
+			}
+		}
+		if o.Path == "" {
+			o.Path = "config"
+		}
+	}
+	if o.Name == "" {
+		o.Name = "config"
+	}
+	if o.Type == "" {
+		o.Type = "yaml"
+	}
+
+	viper.SetConfigName(o.Name)
+	viper.AddConfigPath(o.Path)
+	viper.SetConfigType(o.Type)
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
