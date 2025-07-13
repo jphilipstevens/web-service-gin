@@ -23,6 +23,12 @@ jobs:
             echo "The following files need formatting:" && echo "$unformatted"
             exit 1
           fi
+          go fmt ./...
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Running go fmt changed files. Please run 'go fmt ./...' locally and commit the result."
+            git diff --color
+            exit 1
+          fi
 
       - name: Vet
         run: go vet ./...
