@@ -91,13 +91,11 @@ func TestGetAlbumsService(t *testing.T) {
 			Items: []Album{{ID: "2", Title: "Another Album", Artist: "Test Artist", Price: 14.99}},
 		}
 
-		marshalled, _ := json.Marshal(expectedAlbums)
+		marshalledAlbums, _ := json.Marshal(expectedAlbums)
 
 		mockCacher.Client.On("Get", ctx, "_albumsArtistFilter:Test Artist").Return("", cache.ErrCacheMiss).Once()
-		marshalledAlbums, _ := json.Marshal(expectedAlbums)
 		mockCacher.Client.On("Set", ctx, "_albumsArtistFilter:Test Artist", string(marshalledAlbums), time.Minute*albumsCacheTTLMinutes).Return(nil).Once()
 		mockRepo.On("GetAlbums", ctx, artist).Return(expectedAlbums, nil).Once()
-		mockCacher.Client.On("Set", ctx, "_albumsArtistFilter:Test Artist", string(marshalled), time.Minute*10).Return(nil).Once()
 
 		albums, err := service.GetAlbums(ctx, GetAlbumsParams{
 			Artist: artist,
