@@ -65,14 +65,19 @@ func (rc *redisCache) Get(serviceName string, ctx context.Context, key string) (
 		ResponseTime: time.Since(startTime),
 		Key:          key,
 		Error:        err,
-		Hit:          val != "",
+		Hit:          err == nil,
 	}
 	clientContext.AddCacheCall(ctx, newCacheCall)
-	if err != nil && err != redis.Nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return "", MapCacheError(&err)
+
+	if err != nil {
+		mappedErr := MapCacheError(&err)
+		if err != redis.Nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+		}
+		return "", mappedErr
 	}
+
 	span.SetStatus(codes.Ok, "")
 
 	span.SetAttributes(attribute.String("cache.name", "redis"))

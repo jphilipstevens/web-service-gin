@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jphilipstevens/web-service-gin/app/db"
 	"github.com/jphilipstevens/web-service-gin/app/dependencies"
+	"github.com/jphilipstevens/web-service-gin/testUtils"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/gin-gonic/gin"
@@ -37,14 +37,14 @@ func TestInit(t *testing.T) {
 		}
 		defer client.Close()
 
-		database := db.Database{Client: client}
+		database := testUtils.NewDatabase(client)
 
 		mockCache := new(MockCache)
 
 		router := gin.Default()
 
 		deps := &dependencies.Dependencies{
-			DB:     &database,
+			DB:     database,
 			Cache:  mockCache,
 			Router: router,
 		}
