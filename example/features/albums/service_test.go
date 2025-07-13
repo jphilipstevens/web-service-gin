@@ -91,6 +91,8 @@ func TestGetAlbumsService(t *testing.T) {
 		}
 
 		mockCacher.Client.On("Get", ctx, "_albumsArtistFilter:Test Artist").Return("", cache.ErrCacheMiss).Once()
+		marshalledAlbums, _ := json.Marshal(expectedAlbums)
+		mockCacher.Client.On("Set", ctx, "_albumsArtistFilter:Test Artist", string(marshalledAlbums), time.Minute*albumsCacheTTLMinutes).Return(nil).Once()
 		mockRepo.On("GetAlbums", ctx, artist).Return(expectedAlbums, nil).Once()
 
 		albums, err := service.GetAlbums(ctx, GetAlbumsParams{

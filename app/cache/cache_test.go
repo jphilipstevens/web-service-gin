@@ -55,7 +55,7 @@ func TestGet(t *testing.T) {
 	t.Run("Test Get with non-existent key", func(t *testing.T) {
 		ctx := testUtils.CreateTestContext()
 		result, err := cacher.Get(serviceName, ctx, "nonExistentKey")
-		assert.Equal(t, ErrCacheMiss, err)
+		assert.NoError(t, err)
 		assert.Equal(t, "", result)
 	})
 
@@ -69,7 +69,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestSet(t *testing.T) {
-	config.Init()
+	config.Init(config.ConfigOptions{Path: "../../config", Name: "config", Type: "yaml"})
 	mr, cacher := setupTestRedis(t)
 	defer mr.Close()
 

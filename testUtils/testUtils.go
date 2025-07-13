@@ -37,6 +37,10 @@ func (d *dummyAppTracer) CreateSpan(ctx context.Context, serviceName string) (co
 	return tracer.Start(ctx, serviceName)
 }
 
+func (d *dummyAppTracer) Shutdown(ctx context.Context) error {
+	return nil
+}
+
 func NewAppTracer() appTracer.AppTracer {
 	return &dummyAppTracer{}
 }
