@@ -126,7 +126,7 @@ func (rc *redisCache) Set(serviceName string, ctx context.Context, key string, v
 func MapCacheError(err *error) error {
 	switch {
 	case *err == redis.Nil:
-		return ErrCacheMiss
+		return nil
 	case *err != nil:
 		return ErrCacheGeneric
 	default:
