@@ -69,7 +69,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestSet(t *testing.T) {
-	config.Init()
+	config.Init(config.ConfigOptions{Path: "example/config", Name: "config", Type: "yaml"})
 	mr, cacher := setupTestRedis(t)
 	defer mr.Close()
 

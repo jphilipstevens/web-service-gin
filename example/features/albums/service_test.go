@@ -3,6 +3,7 @@ package albums
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"testing"
 	"time"
 
@@ -90,8 +91,11 @@ func TestGetAlbumsService(t *testing.T) {
 			Items: []Album{{ID: "2", Title: "Another Album", Artist: "Test Artist", Price: 14.99}},
 		}
 
+		marshalled, _ := json.Marshal(expectedAlbums)
+
 		mockCacher.Client.On("Get", ctx, "_albumsArtistFilter:Test Artist").Return("", cache.ErrCacheMiss).Once()
 		mockRepo.On("GetAlbums", ctx, artist).Return(expectedAlbums, nil).Once()
+		mockCacher.Client.On("Set", ctx, "_albumsArtistFilter:Test Artist", string(marshalled), time.Minute*10).Return(nil).Once()
 
 		albums, err := service.GetAlbums(ctx, GetAlbumsParams{
 			Artist: artist,
@@ -101,6 +105,24 @@ func TestGetAlbumsService(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedAlbums, albums)
+		mockCacher.Client.AssertExpectations(t)
+		mockRepo.AssertExpectations(t)
+	})
+
+	t.Run("Repository error", func(t *testing.T) {
+		expectedErr := errors.New("db error")
+
+		mockCacher.Client.On("Get", ctx, "_albumsArtistFilter:Test Artist").Return("", cache.ErrCacheMiss).Once()
+		mockRepo.On("GetAlbums", ctx, artist).Return((*db.Paginated[Album])(nil), expectedErr).Once()
+
+		albums, err := service.GetAlbums(ctx, GetAlbumsParams{
+			Artist: artist,
+			Limit:  10,
+			Page:   0,
+		})
+
+		assert.Error(t, err)
+		assert.Nil(t, albums)
 		mockCacher.Client.AssertExpectations(t)
 		mockRepo.AssertExpectations(t)
 	})
