@@ -18,7 +18,7 @@ jobs:
 
       - name: Check formatting
         run: |
-          unformatted=$(gofmt -l $(git ls-files '*.go'))
+          unformatted=$(gofmt -s -l $(git ls-files '*.go'))
           if [ -n "$unformatted" ]; then
             echo "The following files need formatting:" && echo "$unformatted"
             exit 1
