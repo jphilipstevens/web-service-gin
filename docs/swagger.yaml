@@ -1,0 +1,68 @@
+basePath: /
+definitions:
+  albums.Album:
+    properties:
+      artist:
+        type: string
+      id:
+        type: string
+      price:
+        type: number
+      title:
+        type: string
+    type: object
+  apiErrors.APIError:
+    properties:
+      code:
+        type: string
+      details: {}
+      message:
+        type: string
+    type: object
+  middleware.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/apiErrors.APIError'
+    type: object
+info:
+  contact: {}
+  description: Example API demonstrating middleware and Swagger docs.
+  title: Web Service Gin Example
+  version: "1.0"
+paths:
+  /v1/albums:
+    get:
+      description: Retrieves albums. Requires Authorization header and X-Rate header.
+      parameters:
+      - description: Artist name
+        in: query
+        name: artist
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/albums.Album'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/middleware.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: List albums
+      tags:
+      - albums
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

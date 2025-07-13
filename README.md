@@ -87,6 +87,24 @@ To stop the server, press `Ctrl+C` in the terminal. The application will perform
 
 For more detailed information on each component, please refer to the respective files in the project structure.
 
+## Swagger API Documentation
+
+Swagger documentation is generated with [swag](https://github.com/swaggo/swag) and served at `/docs/index.html` when the server is running.
+
+To update the documentation:
+
+1. Install the `swag` CLI: `go install github.com/swaggo/swag/cmd/swag@latest`.
+2. Run `swag init -g example/main.go` from the repository root.
+3. Start the server and browse to `http://localhost:8080/docs/index.html`.
+
+Each handler and middleware includes Swagger comments so new routes should follow the existing pattern. Middleware attached to a route is documented using the `@Middleware` annotation.
+
+### Adding Middleware
+
+Middleware can be registered globally, for route groups, or for individual routes. Global middleware is added in `app/server.go`, group middleware in each module's `init.go`, and route middleware when declaring the handler.
+
+When implementing new middleware, document it with a comment starting with `// @Middleware` so Swagger includes the description.
+
 ## Structure
 
 ```
@@ -119,7 +137,7 @@ For more detailed information on each component, please refer to the respective 
 
 ## TODOs
 
-- [ ] Add swagger
+- [x] Add swagger
 - [x] add versioning
 - [ ] Add tests
 - [x] logger

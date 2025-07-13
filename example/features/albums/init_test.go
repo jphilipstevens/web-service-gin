@@ -2,6 +2,8 @@ package albums
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -29,7 +31,7 @@ func (rc *MockCache) Set(serviceName string, ctx context.Context, key string, va
 func TestInit(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	t.Run("Successful Albums Module Init", func(t *testing.T) {
+	t.Run("Middleware enforced", func(t *testing.T) {
 		// Setup
 		client, _, err := sqlmock.New()
 		if err != nil {
@@ -49,16 +51,16 @@ func TestInit(t *testing.T) {
 			Router: router,
 		}
 
-		// Execute
 		Init(deps)
 
-		// Assert
 		routes := router.Routes()
-		assert.Len(t, routes, 1, "Should have 1 route")
+		assert.Len(t, routes, 1)
 
-		route := routes[0]
-		assert.Equal(t, "GET", route.Method, "Route method should be GET")
-		assert.Equal(t, "/v1/albums", route.Path, "Route path should be /v1/albums")
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodGet, "/v1/albums", nil)
+		router.ServeHTTP(w, req)
+
+		assert.Equal(t, http.StatusUnauthorized, w.Code)
 	})
 
 }
