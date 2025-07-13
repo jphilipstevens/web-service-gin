@@ -138,7 +138,7 @@ When implementing new middleware, document it with a comment starting with `// @
 ## TODOs
 
 - [x] Add swagger
-- [ ] add versioning
+- [x] add versioning
 - [ ] Add tests
 - [x] logger
 - [x] graceful shutdown

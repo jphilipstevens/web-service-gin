@@ -100,6 +100,7 @@ func TestInsert(t *testing.T) {
 
 func TestInsertBatch(t *testing.T) {
 	config.Init(config.ConfigOptions{Path: "../../example/config", Name: "config", Type: "yaml"})
+//	config.Init(config.ConfigOptions{Path: "example/config", Name: "config", Type: "yaml"})
 	mockDB, mock, _ := sqlmock.New()
 	defer mockDB.Close()
 
