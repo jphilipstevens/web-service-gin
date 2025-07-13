@@ -104,6 +104,10 @@ func RunServer(ServerParams ServerParams) {
 	router.Use(middleware.ErrorHandler)
 	router.Use(middleware.JsonLogger())
 
+	for _, mw := range userMiddleware {
+		router.Use(mw)
+	}
+
 	var serverDependencies *dependencies.Dependencies
 	if ServerParams.Dependencies == nil {
 		serverDependencies = &dependencies.Dependencies{

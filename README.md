@@ -105,6 +105,28 @@ Middleware can be registered globally, for route groups, or for individual route
 
 When implementing new middleware, document it with a comment starting with `// @Middleware` so Swagger includes the description.
 
+#### Registering Custom Middleware
+
+Client projects can extend the request pipeline by registering their own middleware before starting the server. Middleware functions must follow the Gin handler signature:
+
+```go
+func(c *gin.Context)
+```
+
+Use `app.UseMiddleware` in `main.go` to add middleware that will run for every route after the built‑in middleware:
+
+```go
+srvMw := func(c *gin.Context) {
+    log.Printf("path: %s", c.Request.URL.Path)
+    c.Next()
+}
+
+app.UseMiddleware(srvMw)
+app.RunServer(app.ServerParams{Routes: registerRoutes, ConfigOptions: cfg})
+```
+
+Core middleware for tracing, context propagation, error handling and logging always runs first and cannot be replaced. Custom middleware executes next, followed by any route‑specific middleware configured within modules.
+
 ## Structure
 
 ```
