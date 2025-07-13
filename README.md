@@ -120,7 +120,7 @@ For more detailed information on each component, please refer to the respective 
 ## TODOs
 
 - [ ] Add swagger
-- [ ] add versioning
+- [x] add versioning
 - [ ] Add tests
 - [x] logger
 - [x] graceful shutdown
