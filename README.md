@@ -19,10 +19,7 @@ This project is a template for building web services using the Gin framework in 
 
 ## Configuration
 
-The application is configured using a YAML file located at `config/config.yaml`. Here's how to set it up:
-
-1. Copy the `config.yaml.example` to `config.yaml`.
-2. Edit the `config.yaml` file to set your specific configuration:
+The application is configured using a YAML file located at `example/config/config.yaml`. Edit this file to set your specific configuration:
 
    server:
      port: 8080
@@ -34,9 +31,14 @@ The application is configured using a YAML file located at `config/config.yaml`.
      user: youruser
      password: yourpassword
      dbname: yourdbname
+     driver: postgres
+     maxOpenConns: 5
+     maxIdleConns: 2
+     connMaxLifetime: 30m
 
-   cache:
-     address: localhost:6379
+   redis:
+     host: localhost
+     port: 6379
      password: ""
      db: 0
 
@@ -44,7 +46,7 @@ The application is configured using a YAML file located at `config/config.yaml`.
      level: info
      format: json
 
-   Adjust the values according to your environment and requirements.
+   Adjust the values according to your environment and requirements. The `maxOpenConns`, `maxIdleConns`, and `connMaxLifetime` settings control database connection pooling.
 
 ## Features
 
@@ -61,9 +63,9 @@ The application is configured using a YAML file located at `config/config.yaml`.
 ## Getting Started
 
 1. Clone the repository
-2. Configure the `config.yaml` file
+2. Configure `example/config/config.yaml`
 3. Run `go mod tidy` to install dependencies
-4. Run `go run main.go` to start the server
+4. Run `go run example/main.go` to start the server
 
 ## Starting the Server
 
@@ -73,13 +75,13 @@ To start the server, follow these steps:
 2. Open a terminal and navigate to the project root directory.
 3. Run the following command:
 
-   go run main.go
+   go run example/main.go
 
 4. You should see output similar to this:
 
    2023/06/10 15:30:45 Starting server on :8080
 
-5. The server is now running and listening on port 8080 (or the port specified in your `config.yaml`).
+5. The server is now running and listening on port 8080 (or the port specified in your `example/config/config.yaml`).
 
 You can now send requests to `http://localhost:8080` to interact with the API.
 
@@ -130,29 +132,20 @@ Core middleware for tracing, context propagation, error handling and logging alw
 ## Structure
 
 ```
-├── app                         // Our application and all dependent code
-│   ├── albums                  // Our Albums domain, including all APIs, services, and models
-│   │   ├── controller.go       // API controller for the Album domain
-│   │   ├── service.go          // service layer for all business logic
-│   │   ├── repository.go       // repository layer for all data access to an album
-│   │   ├── models.go           // Models for presenting an Album
-│   │   └── init.go             // the bootstrapping of the entire api, including routes, and versioning
-│   ├── apiErrors                  
-│   │   └── error.go            // API Error creation and model definition
-│   ├── cache                  
-│   │   └── cache.go            // request caching layer, model and initialization
-│   ├── db                      // database layer module
-│   │   ├── db.go               // database connection and initialization
-│   │   ├── error.go            // error mapping from db specific to application error
-│   │   └── models.go           // shared models from the database E.G. pagination models
-│   ├── middleware              // middleware used for the application
-│   │   └── errorHandler.go     // error handling code to return standardized error models
-├── config
-│   └── config.yaml             // yaml file for all configuration
-├── seed                        // seed data for the application locally
-│   ├── albums.go               // Albums seed data
-│   └── seed.go                 // main seed script for all models
-└── main.go
+├── app                         // Core application modules
+│   ├── apiErrors               // API error helpers
+│   ├── cache                   // request caching layer
+│   ├── db                      // database connectors
+│   ├── middleware              // shared middleware
+│   └── server.go               // server bootstrap
+├── example
+│   ├── config                  // application configuration
+│   │   └── config.yaml
+│   ├── features
+│   │   └── albums              // Albums domain implementation
+│   ├── seed                    // seed data
+│   └── main.go
+├── go.mod
 └── go.sum                      // Go module checksum file
 
 ```
