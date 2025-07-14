@@ -64,6 +64,21 @@ func NewDatabase(dbConfig config.DatabaseConfig, appTracer appTracer.AppTracer) 
 		return nil, err
 	}
 
+	if dbConfig.MaxOpenConns < 0 || dbConfig.MaxIdleConns < 0 || dbConfig.ConnMaxLifetime < 0 {
+		db.Close()
+		return nil, fmt.Errorf("invalid pool configuration")
+	}
+
+	if dbConfig.MaxOpenConns > 0 {
+		db.SetMaxOpenConns(dbConfig.MaxOpenConns)
+	}
+	if dbConfig.MaxIdleConns > 0 {
+		db.SetMaxIdleConns(dbConfig.MaxIdleConns)
+	}
+	if dbConfig.ConnMaxLifetime > 0 {
+		db.SetConnMaxLifetime(dbConfig.ConnMaxLifetime)
+	}
+
 	err = db.Ping()
 	if err != nil {
 		db.Close()

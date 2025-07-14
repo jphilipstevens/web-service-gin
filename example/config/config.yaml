@@ -19,6 +19,9 @@ database:
   dbname: album-store
   sslmode: disable
   driver: postgres
+  maxOpenConns: 5
+  maxIdleConns: 2
+  connMaxLifetime: 30m
 
 uptrace:
   dsn: "http://project2_secret_token@localhost:14317/2"

@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -28,6 +29,10 @@ type DatabaseConfig struct {
 
 	DBName  string `mapstructure:"dbname"`
 	SSLMode string `mapstructure:"sslmode"`
+
+	MaxOpenConns    int           `mapstructure:"maxOpenConns"`
+	MaxIdleConns    int           `mapstructure:"maxIdleConns"`
+	ConnMaxLifetime time.Duration `mapstructure:"connMaxLifetime"`
 }
 
 type UptraceConfig struct {
