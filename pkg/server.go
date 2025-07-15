@@ -14,7 +14,6 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 
 	"github.com/jphilipstevens/web-service-gin/pkg/appTracer"
-	"github.com/jphilipstevens/web-service-gin/pkg/cache"
 	"github.com/jphilipstevens/web-service-gin/pkg/config"
 	"github.com/jphilipstevens/web-service-gin/pkg/dependencies"
 	"github.com/jphilipstevens/web-service-gin/pkg/middleware"
@@ -22,53 +21,40 @@ import (
 
 const gracefulShutdownTimeout = 5 * time.Second
 
-// RouterFunc registers routes using the provided dependency container. The
-// generic type parameter represents the application's database client.
-type RouterFunc[T any] func(deps *dependencies.Dependencies[T])
+// RouterFunc registers routes using the provided dependency container.
+type RouterFunc func(deps *dependencies.Dependencies)
 
 // Server exposes a composable HTTP server instance with optional components.
 // The generic type parameter indicates the application's database client type.
-type Server[T any] struct {
+type Server struct {
 	config config.ConfigFile
-	deps   *dependencies.Dependencies[T]
+	deps   *dependencies.Dependencies
 }
 
 // Config returns the loaded application configuration.
-func (s *Server[T]) Config() config.ConfigFile {
+func (s *Server) Config() config.ConfigFile {
 	return s.config
 }
 
 // Dependencies returns the dependency container for advanced customization.
-func (s *Server[T]) Dependencies() *dependencies.Dependencies[T] {
+func (s *Server) Dependencies() *dependencies.Dependencies {
 	return s.deps
 }
 
-// WithCache injects a custom caching implementation. Passing nil removes the
-// cache dependency.
-func (s *Server[T]) WithCache(c cache.Cacher) {
-	s.deps.Cache = c
-}
-
-// WithDatabase injects a custom database implementation. Passing the zero value
-// removes the dependency.
-func (s *Server[T]) WithDatabase(d T) {
-	s.deps.DB = d
-}
-
 // Use registers middleware to run after the built-in middleware stack.
-func (s *Server[T]) Use(mw gin.HandlerFunc) {
+func (s *Server) Use(mw gin.HandlerFunc) {
 	s.deps.Router.Use(mw)
 }
 
 // RegisterRoutes allows modules to add routes to the server.
-func (s *Server[T]) RegisterRoutes(fn RouterFunc[T]) {
+func (s *Server) RegisterRoutes(fn RouterFunc) {
 	fn(s.deps)
 }
 
 // NewServer creates a new Server using the provided configuration options. Only
 // the router and tracer are initialized by default, leaving cache and database
 // setup to the caller.
-func NewServer[T any](opts config.ConfigOptions) (*Server[T], error) {
+func NewServer(opts config.ConfigOptions) (*Server, error) {
 	if err := config.Init(opts); err != nil {
 		return nil, err
 	}
@@ -84,16 +70,16 @@ func NewServer[T any](opts config.ConfigOptions) (*Server[T], error) {
 	router.Use(middleware.ErrorHandler)
 	router.Use(middleware.JsonLogger())
 
-	deps := &dependencies.Dependencies[T]{
+	deps := &dependencies.Dependencies{
 		Router: router,
 		Tracer: tracer,
 	}
 
-	return &Server[T]{config: cfg, deps: deps}, nil
+	return &Server{config: cfg, deps: deps}, nil
 }
 
 // Run starts the HTTP server and blocks until a shutdown signal is received.
-func (s *Server[T]) Run() error {
+func (s *Server) Run() error {
 	srv := &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", s.config.Server.Host, s.config.Server.Port),
 		Handler: s.deps.Router,

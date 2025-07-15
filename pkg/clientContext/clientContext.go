@@ -68,21 +68,6 @@ type ResponseInfo struct {
 	Status int
 }
 
-// DatabaseCall represents a call made to a database.
-type DatabaseCall struct {
-	// ServiceTransaction contains information about the service and span ID.
-	ServiceTransaction
-
-	// Query is the SQL query or operation executed on the database.
-	Query string
-
-	// ResponseTime is the duration it took for the database call to complete.
-	ResponseTime time.Duration
-
-	// Error holds any error that occurred during the database call.
-	Error error
-}
-
 // DataStoreCall represents a call made to a database or cache.
 type DataStoreCall struct {
 	ServiceTransaction
@@ -139,7 +124,7 @@ type ClientContext struct {
 	Request      RequestInfo
 	Response     ResponseInfo
 	Downstreams  []DownstreamCall
-	Database     []DatabaseCall
+	DataStore    []DataStoreCall
 	Cache        []CacheCall
 	ResponseTime time.Duration
 }
@@ -165,12 +150,36 @@ func AddDownstreamCall(ctx context.Context, call DownstreamCall) {
 	currentContext.Downstreams = append(currentContext.Downstreams, call)
 }
 
+// AddDataStoreCall records a call to any data store in the current context.
+func AddDataStoreCall(ctx context.Context, call DataStoreCall) {
+	currentContext := ctx.Value(ClientContextKey).(*ClientContext)
+	currentContext.DataStore = append(currentContext.DataStore, call)
+}
+
 func AddDatabaseCall(ctx context.Context, call DatabaseCall) {
 	currentContext := ctx.Value(ClientContextKey).(*ClientContext)
 	currentContext.Database = append(currentContext.Database, call)
+	dsCall := DataStoreCall{
+		ServiceTransaction: call.ServiceTransaction,
+		StoreType:          "db",
+		Operation:          call.Query,
+		ResponseTime:       call.ResponseTime,
+		Error:              call.Error,
+	}
+	currentContext.DataStore = append(currentContext.DataStore, dsCall)
 }
 
 func AddCacheCall(ctx context.Context, call CacheCall) {
 	currentContext := ctx.Value(ClientContextKey).(*ClientContext)
 	currentContext.Cache = append(currentContext.Cache, call)
+	dsCall := DataStoreCall{
+		ServiceTransaction: call.ServiceTransaction,
+		StoreType:          "cache",
+		Operation:          call.Action,
+		Key:                call.Key,
+		ResponseTime:       call.ResponseTime,
+		Error:              call.Error,
+		Hit:                &call.Hit,
+	}
+	currentContext.DataStore = append(currentContext.DataStore, dsCall)
 }

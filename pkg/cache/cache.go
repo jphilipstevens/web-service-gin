@@ -10,6 +10,7 @@ import (
 	"github.com/jphilipstevens/web-service-gin/pkg/appTracer"
 	"github.com/jphilipstevens/web-service-gin/pkg/clientContext"
 	"github.com/jphilipstevens/web-service-gin/pkg/config"
+	"github.com/jphilipstevens/web-service-gin/pkg/datastore"
 
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
@@ -17,7 +18,10 @@ import (
 	"go.opentelemetry.io/otel/codes"
 )
 
+// Cacher exposes Redis-style functionality while satisfying datastore.DataStore.
 type Cacher interface {
+	datastore.DataStore
+
 	Get(serviceName string, ctx context.Context, key string) (val string, err error)
 	Set(serviceName string, ctx context.Context, key string, value string, expiration time.Duration) error
 }
@@ -56,7 +60,8 @@ func (rc *redisCache) Get(serviceName string, ctx context.Context, key string) (
 	defer span.End()
 
 	val, err := rc.Client.Get(ctx, key).Result()
-	newCacheCall := clientContext.CacheCall{
+	hit := err == nil
+	cacheCall := clientContext.CacheCall{
 		ServiceTransaction: clientContext.ServiceTransaction{
 			ServiceName: serviceName,
 			SpanId:      span.SpanContext().TraceID().String(),
@@ -65,9 +70,19 @@ func (rc *redisCache) Get(serviceName string, ctx context.Context, key string) (
 		ResponseTime: time.Since(startTime),
 		Key:          key,
 		Error:        err,
-		Hit:          err == nil,
+		Hit:          hit,
 	}
-	clientContext.AddCacheCall(ctx, newCacheCall)
+	clientContext.AddCacheCall(ctx, cacheCall)
+	dsCall := clientContext.DataStoreCall{
+		ServiceTransaction: cacheCall.ServiceTransaction,
+		StoreType:          "cache",
+		Operation:          "get",
+		Key:                key,
+		Hit:                &hit,
+		ResponseTime:       cacheCall.ResponseTime,
+		Error:              err,
+	}
+	clientContext.AddDataStoreCall(ctx, dsCall)
 
 	if err != nil {
 		mappedErr := MapCacheError(&err)
@@ -95,7 +110,7 @@ func (rc *redisCache) Set(serviceName string, ctx context.Context, key string, v
 
 	err := rc.Client.Set(ctx, key, value, expiration).Err()
 
-	newCacheCall := clientContext.CacheCall{
+	cacheCall := clientContext.CacheCall{
 		ServiceTransaction: clientContext.ServiceTransaction{
 			ServiceName: serviceName,
 			SpanId:      span.SpanContext().TraceID().String(),
@@ -106,7 +121,17 @@ func (rc *redisCache) Set(serviceName string, ctx context.Context, key string, v
 		Error:        err,
 		Hit:          false,
 	}
-	clientContext.AddCacheCall(ctx, newCacheCall)
+	clientContext.AddCacheCall(ctx, cacheCall)
+	dsCall := clientContext.DataStoreCall{
+		ServiceTransaction: cacheCall.ServiceTransaction,
+		StoreType:          "cache",
+		Operation:          "set",
+		Key:                key,
+		Hit:                nil,
+		ResponseTime:       cacheCall.ResponseTime,
+		Error:              err,
+	}
+	clientContext.AddDataStoreCall(ctx, dsCall)
 
 	if err != nil {
 		span.RecordError(err)
@@ -121,6 +146,34 @@ func (rc *redisCache) Set(serviceName string, ctx context.Context, key string, v
 	span.SetAttributes(attribute.Int("cache.expirationSeconds", int(expiration.Seconds())))
 
 	return MapCacheError(&err)
+}
+
+// ExecContext implements datastore.DataStore for write operations.
+func (rc *redisCache) ExecContext(serviceName string, ctx context.Context, operation string, args ...any) (any, error) {
+	if operation != "set" || len(args) < 3 {
+		return nil, fmt.Errorf("unsupported cache exec: %s", operation)
+	}
+	key, _ := args[0].(string)
+	value, _ := args[1].(string)
+	exp, ok := args[2].(time.Duration)
+	if !ok {
+		return nil, fmt.Errorf("invalid expiration")
+	}
+	return nil, rc.Set(serviceName, ctx, key, value, exp)
+}
+
+// QueryContext implements datastore.DataStore for read operations.
+func (rc *redisCache) QueryContext(serviceName string, ctx context.Context, operation string, args ...any) (any, error) {
+	if operation != "get" || len(args) < 1 {
+		return nil, fmt.Errorf("unsupported cache query: %s", operation)
+	}
+	key, _ := args[0].(string)
+	return rc.Get(serviceName, ctx, key)
+}
+
+// Close shuts down the underlying redis client.
+func (rc *redisCache) Close() {
+	rc.Client.Close()
 }
 
 func MapCacheError(err *error) error {

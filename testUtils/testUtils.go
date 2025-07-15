@@ -9,6 +9,7 @@ import (
 
 	"github.com/jphilipstevens/web-service-gin/pkg/appTracer"
 	"github.com/jphilipstevens/web-service-gin/pkg/clientContext"
+	"github.com/jphilipstevens/web-service-gin/pkg/datastore"
 	"github.com/jphilipstevens/web-service-gin/pkg/db"
 
 	"go.opentelemetry.io/otel"
@@ -45,7 +46,7 @@ func NewAppTracer() appTracer.AppTracer {
 	return &dummyAppTracer{}
 }
 
-func NewDatabase(mockedDB *sql.DB) db.Database {
+func NewDatabase(mockedDB *sql.DB) datastore.DataStore {
 	testDatabase := db.DatabaseImpl{
 		Client:    mockedDB,
 		AppTracer: NewAppTracer(),
