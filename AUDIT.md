@@ -6,7 +6,7 @@ This document summarizes the audit of feature implementation and readiness as de
 | ------- | ------ | ---------------- | -------------------- |
 | **Modular Structure** | ✅ Present | [README](README.md) lines 133-154 | Modules exist for cache, db, middleware, etc. Album module lives under `example/features`, not `app/albums` as README structure suggests. |
 | **RESTful API (Albums)** | ⚠️ Partial | [controller.go](example/features/albums/controller.go) | Only `GET /v1/albums` implemented; no POST/PUT/DELETE routes. |
-| **Database Integration** | ✅ Present | [db.go](app/db/db.go) | Uses `sql.Open` with tracing. Connection pooling defaults; no pooling config, but connection handled. |
+| **Database Integration** | ✅ Present | [db.go](app/db/db.go) | Uses `sql.Open` with tracing. `NewServer` accepts a generic DB type, so callers can supply any client. Connection pooling defaults; no pooling config. |
 | **Caching** | ✅ Present | [cache.go](app/cache/cache.go) | Redis cache with tracing instrumentation. Example server composes it via `NewServer`. |
 | **Error Handling** | ✅ Present | [errorHandler.go](app/middleware/errorHandler.go) | Middleware returns standardized errors. |
 | **Middleware Support** | ✅ Present | [server.go](app/server.go) | `Server.Use` allows registration of custom middleware. |
