@@ -7,9 +7,9 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/jphilipstevens/web-service-gin/app/appTracer"
-	"github.com/jphilipstevens/web-service-gin/app/clientContext"
-	"github.com/jphilipstevens/web-service-gin/app/db"
+	"github.com/jphilipstevens/web-service-gin/pkg/appTracer"
+	"github.com/jphilipstevens/web-service-gin/pkg/clientContext"
+	"github.com/jphilipstevens/web-service-gin/pkg/db"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
