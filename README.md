@@ -115,16 +115,19 @@ Client projects can extend the request pipeline by registering their own middlew
 func(c *gin.Context)
 ```
 
-Use `app.UseMiddleware` in `main.go` to add middleware that will run for every route after the built‑in middleware:
+Use the server's `Use` method in `main.go` to add middleware that will run for every route after the built‑in middleware:
 
 ```go
+srv, _ := app.NewServer(cfg)
+
 srvMw := func(c *gin.Context) {
     log.Printf("path: %s", c.Request.URL.Path)
     c.Next()
 }
 
-app.UseMiddleware(srvMw)
-app.RunServer(app.ServerParams{Routes: registerRoutes, ConfigOptions: cfg})
+srv.Use(srvMw)
+srv.RegisterRoutes(registerRoutes)
+srv.Run()
 ```
 
 Core middleware for tracing, context propagation, error handling and logging always runs first and cannot be replaced. Custom middleware executes next, followed by any route‑specific middleware configured within modules.
