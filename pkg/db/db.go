@@ -8,10 +8,10 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/jphilipstevens/web-service-gin/pkg/appTracer"
-	"github.com/jphilipstevens/web-service-gin/pkg/clientContext"
-	"github.com/jphilipstevens/web-service-gin/pkg/config"
-	"github.com/jphilipstevens/web-service-gin/pkg/datastore"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/appTracer"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/clientContext"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/config"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/datastore"
 )
 
 // Database interface defines methods for interacting with the database.

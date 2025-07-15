@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/jphilipstevens/web-service-gin/pkg/clientContext"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/clientContext"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"

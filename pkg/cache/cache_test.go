@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jphilipstevens/web-service-gin/pkg/config"
 	"github.com/jphilipstevens/web-service-gin/testUtils"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/config"
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/stretchr/testify/assert"

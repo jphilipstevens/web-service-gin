@@ -1,4 +1,4 @@
-package app
+package server
 
 import (
 	"context"
@@ -13,10 +13,10 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 
-	"github.com/jphilipstevens/web-service-gin/pkg/appTracer"
-	"github.com/jphilipstevens/web-service-gin/pkg/config"
-	"github.com/jphilipstevens/web-service-gin/pkg/dependencies"
-	"github.com/jphilipstevens/web-service-gin/pkg/middleware"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/appTracer"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/config"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/dependencies"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/middleware"
 )
 
 const gracefulShutdownTimeout = 5 * time.Second

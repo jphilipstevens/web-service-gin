@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jphilipstevens/web-service-gin/pkg/clientContext"
 	"github.com/jphilipstevens/web-service-gin/testUtils"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/clientContext"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"

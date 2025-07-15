@@ -5,7 +5,7 @@ import (
 
 	"strings"
 
-	"github.com/jphilipstevens/web-service-gin/pkg/clientContext"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/clientContext"
 
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel/trace"

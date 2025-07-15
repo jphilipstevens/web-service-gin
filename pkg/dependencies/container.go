@@ -1,7 +1,7 @@
 package dependencies
 
 import (
-	"github.com/jphilipstevens/web-service-gin/pkg/appTracer"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/appTracer"
 
 	"github.com/gin-gonic/gin"
 )

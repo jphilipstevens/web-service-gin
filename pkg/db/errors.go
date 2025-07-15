@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/jphilipstevens/web-service-gin/pkg/apiErrors"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/apiErrors"
 )
 
 const (

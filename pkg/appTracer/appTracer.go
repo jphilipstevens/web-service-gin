@@ -6,8 +6,8 @@ package appTracer
 import (
 	"context"
 
-	"github.com/jphilipstevens/web-service-gin/pkg/config"
-	"github.com/jphilipstevens/web-service-gin/pkg/version"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/config"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/version"
 
 	"github.com/uptrace/uptrace-go/uptrace"
 	"go.opentelemetry.io/otel"

@@ -15,7 +15,7 @@ build: ## Build the entire library (no binary output)
 
 build_with_new_version: ## Patch version + build binary with embedded version string
 	./scripts/version.sh patch 
-	$(GOBUILD) -ldflags "-X github.com/jphilipstevens/web-service-gin/pkg/version.Version=$(shell cat $(VERSION_FILE))" -o $(BINARY_NAME) -v $(MAIN_PATH)
+	$(GOBUILD) -ldflags "-X github.com/jphilipstevens/web-service-gin/v2/pkg/version.Version=$(shell cat $(VERSION_FILE))" -o $(BINARY_NAME) -v $(MAIN_PATH)
 
 # 🧪 Test & Coverage
 test: ## Run unit tests

@@ -5,7 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/jphilipstevens/web-service-gin/pkg/apiErrors"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/apiErrors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"

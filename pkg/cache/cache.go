@@ -6,11 +6,11 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/jphilipstevens/web-service-gin/pkg/apiErrors"
-	"github.com/jphilipstevens/web-service-gin/pkg/appTracer"
-	"github.com/jphilipstevens/web-service-gin/pkg/clientContext"
-	"github.com/jphilipstevens/web-service-gin/pkg/config"
-	"github.com/jphilipstevens/web-service-gin/pkg/datastore"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/apiErrors"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/appTracer"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/clientContext"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/config"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/datastore"
 
 	"github.com/redis/go-redis/extra/redisotel/v9"
 	"github.com/redis/go-redis/v9"
