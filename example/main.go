@@ -13,6 +13,8 @@ import (
 	"os"
 
 	"github.com/jphilipstevens/web-service-gin/app"
+	"github.com/jphilipstevens/web-service-gin/app/cache"
+	"github.com/jphilipstevens/web-service-gin/app/db"
 	"github.com/jphilipstevens/web-service-gin/app/dependencies"
 	"github.com/jphilipstevens/web-service-gin/config"
 	"github.com/jphilipstevens/web-service-gin/example/features/albums"
@@ -31,14 +33,32 @@ func registerRoutes(deps *dependencies.Dependencies) {
 func RunApp() {
 	docs.SwaggerInfo.BasePath = "/"
 
-	app.RunServer(app.ServerParams{
-		Routes: registerRoutes,
-		ConfigOptions: config.ConfigOptions{
-			Path: "./example/config", // or from ENV, flags, etc
-			Name: "config",           // without extension
-			Type: "yaml",             // optional
-		},
+	srv, err := app.NewServer(config.ConfigOptions{
+		Path: "./example/config", // or from ENV, flags, etc
+		Name: "config",           // without extension
+		Type: "yaml",             // optional
 	})
+	if err != nil {
+		panic(err)
+	}
+
+	cfg := srv.Config()
+	tracer := srv.Dependencies().Tracer
+
+	dbConn, err := db.NewDatabase(cfg.DB, tracer)
+	if err != nil {
+		panic(err)
+	}
+	cacheClient := cache.NewCacher(cfg.Redis, tracer)
+
+	srv.WithDatabase(dbConn)
+	srv.WithCache(cacheClient)
+
+	srv.RegisterRoutes(registerRoutes)
+
+	if err := srv.Run(); err != nil {
+		panic(err)
+	}
 }
 
 func main() {
