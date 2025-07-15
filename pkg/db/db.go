@@ -11,17 +11,19 @@ import (
 	"github.com/jphilipstevens/web-service-gin/pkg/appTracer"
 	"github.com/jphilipstevens/web-service-gin/pkg/clientContext"
 	"github.com/jphilipstevens/web-service-gin/pkg/config"
+	"github.com/jphilipstevens/web-service-gin/pkg/datastore"
 )
 
 // Database interface defines methods for interacting with the database.
 // It provides an abstraction layer for database operations, allowing for
 // easier testing and potential swapping of database implementations.
 
+// Database exposes SQL behavior while satisfying datastore.DataStore.
 type Database interface {
-	ExecContext(serviceName string, ctx context.Context, query string, args ...any) (*sql.Result, error)
-	QueryContext(serviceName string, ctx context.Context, query string, args ...any) (*sql.Rows, error)
+	datastore.DataStore
+
+	// GetClient returns the underlying sql.DB instance for advanced uses.
 	GetClient() *sql.DB
-	Close()
 }
 
 // DatabaseImpl implements the Database interface and provides methods for
@@ -200,7 +202,7 @@ func (db *DatabaseImpl) GetClient() *sql.DB {
 //	}
 //	// Use result for further operations
 
-func (db *DatabaseImpl) ExecContext(serviceName string, ctx context.Context, query string, args ...any) (*sql.Result, error) {
+func (db *DatabaseImpl) ExecContext(serviceName string, ctx context.Context, query string, args ...any) (any, error) {
 	startTime := time.Now()
 	spanCtx, span := db.AppTracer.CreateSpan(ctx, serviceName)
 	defer span.End()
@@ -211,18 +213,19 @@ func (db *DatabaseImpl) ExecContext(serviceName string, ctx context.Context, que
 		return nil, fmt.Errorf("error executing query: %w", err)
 	}
 
-	newDatabaseCall := clientContext.DatabaseCall{
+	call := clientContext.DataStoreCall{
 		ServiceTransaction: clientContext.ServiceTransaction{
 			ServiceName: serviceName,
 			SpanId:      span.SpanContext().TraceID().String(),
 		},
-		Query:        query,
+		StoreType:    "db",
+		Operation:    query,
 		ResponseTime: time.Since(startTime),
 		Error:        err,
 	}
-	clientContext.AddDatabaseCall(ctx, newDatabaseCall)
+	clientContext.AddDataStoreCall(ctx, call)
 
-	return &result, nil
+	return result, nil
 }
 
 // QueryContext executes a SQL query that returns rows
@@ -249,7 +252,7 @@ func (db *DatabaseImpl) ExecContext(serviceName string, ctx context.Context, que
 //	defer rows.Close()
 //	// Process the rows
 
-func (db *DatabaseImpl) QueryContext(serviceName string, ctx context.Context, query string, args ...any) (*sql.Rows, error) {
+func (db *DatabaseImpl) QueryContext(serviceName string, ctx context.Context, query string, args ...any) (any, error) {
 	startTime := time.Now()
 	spanCtx, span := db.AppTracer.CreateSpan(ctx, serviceName)
 	defer span.End()
@@ -259,16 +262,17 @@ func (db *DatabaseImpl) QueryContext(serviceName string, ctx context.Context, qu
 		span.RecordError(err)
 		return nil, err
 	}
-	newDatabaseCall := clientContext.DatabaseCall{
+	call := clientContext.DataStoreCall{
 		ServiceTransaction: clientContext.ServiceTransaction{
 			ServiceName: serviceName,
 			SpanId:      span.SpanContext().TraceID().String(),
 		},
-		Query:        query,
+		StoreType:    "db",
+		Operation:    query,
 		ResponseTime: time.Since(startTime),
 		Error:        err,
 	}
-	clientContext.AddDatabaseCall(ctx, newDatabaseCall)
+	clientContext.AddDataStoreCall(ctx, call)
 
 	return rows, nil
 }
