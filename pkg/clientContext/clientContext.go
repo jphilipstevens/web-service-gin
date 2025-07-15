@@ -156,19 +156,6 @@ func AddDataStoreCall(ctx context.Context, call DataStoreCall) {
 	currentContext.DataStore = append(currentContext.DataStore, call)
 }
 
-func AddDatabaseCall(ctx context.Context, call DatabaseCall) {
-	currentContext := ctx.Value(ClientContextKey).(*ClientContext)
-	currentContext.Database = append(currentContext.Database, call)
-	dsCall := DataStoreCall{
-		ServiceTransaction: call.ServiceTransaction,
-		StoreType:          "db",
-		Operation:          call.Query,
-		ResponseTime:       call.ResponseTime,
-		Error:              call.Error,
-	}
-	currentContext.DataStore = append(currentContext.DataStore, dsCall)
-}
-
 func AddCacheCall(ctx context.Context, call CacheCall) {
 	currentContext := ctx.Value(ClientContextKey).(*ClientContext)
 	currentContext.Cache = append(currentContext.Cache, call)
