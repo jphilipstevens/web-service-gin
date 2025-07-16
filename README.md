@@ -19,7 +19,7 @@ This project is a template for building web services using the Gin framework in 
 
 ## Configuration
 
-The application is configured using a YAML file located at `example/config/config.yaml`. Edit this file to set your specific configuration:
+The application is configured using a YAML file located next to `main.go`. Edit it to set your specific configuration:
 
    server:
      port: 8080
@@ -63,9 +63,9 @@ The application is configured using a YAML file located at `example/config/confi
 ## Getting Started
 
 1. Clone the repository
-2. Configure `example/config/config.yaml`
+2. Create a configuration file as shown in [docs/basic_server_setup.md](docs/basic_server_setup.md)
 3. Run `go mod tidy` to install dependencies
-4. Run `go run example/main.go` to start the server
+4. Run `go run main.go` to start the server
 
 ## Starting the Server
 
@@ -75,13 +75,13 @@ To start the server, follow these steps:
 2. Open a terminal and navigate to the project root directory.
 3. Run the following command:
 
-   go run example/main.go
+   go run main.go
 
 4. You should see output similar to this:
 
    2023/06/10 15:30:45 Starting server on :8080
 
-5. The server is now running and listening on port 8080 (or the port specified in your `example/config/config.yaml`).
+5. The server is now running and listening on port 8080 (or the port specified in your `config.yaml`).
 
 You can now send requests to `http://localhost:8080` to interact with the API.
 
@@ -96,7 +96,7 @@ Swagger documentation is generated with [swag](https://github.com/swaggo/swag) a
 To update the documentation:
 
 1. Install the `swag` CLI: `go install github.com/swaggo/swag/cmd/swag@latest`.
-2. Run `swag init -g example/main.go` from the repository root.
+2. Run `swag init -g main.go` from the repository root.
 3. Start the server and browse to `http://localhost:8080/docs/index.html`.
 
 Each handler and middleware includes Swagger comments so new routes should follow the existing pattern. Middleware attached to a route is documented using the `@Middleware` annotation.
