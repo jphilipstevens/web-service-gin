@@ -34,7 +34,7 @@ type redisCache struct {
 var ErrCacheMiss = apiErrors.NewNotFoundError("")
 var ErrCacheGeneric = apiErrors.NewGenericError("")
 
-func NewCacher(cfg config.RedisClientConfig, appTracer appTracer.AppTracer) Cacher {
+func NewCacher(cfg config.RedisConfig, appTracer appTracer.AppTracer) Cacher {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
 		Password: cfg.Password,

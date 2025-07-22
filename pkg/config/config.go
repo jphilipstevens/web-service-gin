@@ -1,3 +1,4 @@
+// Package config provides idiomatic Go configuration handling
 package config
 
 import (
@@ -13,7 +14,7 @@ type ServerConfig struct {
 	Port int    `mapstructure:"port"`
 }
 
-type RedisClientConfig struct {
+type RedisConfig struct {
 	Host     string `mapstructure:"host"`
 	Port     int    `mapstructure:"port"`
 	Password string `mapstructure:"password"`
@@ -21,71 +22,50 @@ type RedisClientConfig struct {
 }
 
 type DatabaseConfig struct {
-	Host     string `mapstructure:"host"`
-	Port     int    `mapstructure:"port"`
-	User     string `mapstructure:"user"`
-	Password string `mapstructure:"password"`
-	Driver   string `mapstructure:"driver"`
-
-	DBName  string `mapstructure:"dbname"`
-	SSLMode string `mapstructure:"sslmode"`
-
-	MaxOpenConns    int           `mapstructure:"maxOpenConns"`
-	MaxIdleConns    int           `mapstructure:"maxIdleConns"`
-	ConnMaxLifetime time.Duration `mapstructure:"connMaxLifetime"`
+	Host            string        `mapstructure:"host"`
+	Port            int           `mapstructure:"port"`
+	User            string        `mapstructure:"user"`
+	Password        string        `mapstructure:"password"`
+	Name            string        `mapstructure:"name"`
+	SSLMode         string        `mapstructure:"sslmode"`
+	MaxOpenConns    int           `mapstructure:"max_open_conns"`
+	MaxIdleConns    int           `mapstructure:"max_idle_conns"`
+	ConnMaxLifetime time.Duration `mapstructure:"conn_max_lifetime"`
 }
 
-type UptraceConfig struct {
-	DSN      string `mapstructure:"dsn"`
-	Endpoint string `mapstructure:"endpoint"`
+type Config struct {
+	AppName string         `mapstructure:"app_name"`
+	Server  ServerConfig   `mapstructure:"server"`
+	Redis   RedisConfig    `mapstructure:"redis"`
+	DB      DatabaseConfig `mapstructure:"database"`
 }
 
-type ConfigFile struct {
-	AppName string            `mapstructure:"app_name"`
-	Redis   RedisClientConfig `mapstructure:"redis"`
-	DB      DatabaseConfig    `mapstructure:"database"`
-	Uptrace UptraceConfig     `mapstructure:"uptrace"`
-	Server  ServerConfig      `mapstructure:"server"`
-}
+var globalConfig Config
 
-type ConfigOptions struct {
-	Path string
-	Name string
-	Type string // optional: json, yaml, toml
-}
-
-var configFile ConfigFile
-
-func GetConfig() ConfigFile {
-	if configFile == (ConfigFile{}) {
-		panic(fmt.Errorf("Config File not initialized. This indicates that the main app was not setup correctly. Make sure to call config.Init() in main.go"))
-
-	}
-	return configFile
-}
-
-// Config entries can be set in the config file or as environment variables.
-// When set as environment variables, the key should be in the format where the dot notation is replaced with an underscore.
-// For example, the key "redis.host" can be set as the environment variable "REDIS_HOST"
-func Init(opts ConfigOptions) error {
-	viper.SetConfigName(opts.Name)
-	viper.AddConfigPath(opts.Path)
-
-	if opts.Type != "" {
-		viper.SetConfigType(opts.Type)
-	}
+func Load(path, name, filetype string) (Config, error) {
+	viper.SetConfigName(name)
+	viper.SetConfigType(filetype)
+	viper.AddConfigPath(path)
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
 
-	// Load configuration
-	err := viper.ReadInConfig()
-	if err != nil {
-		return fmt.Errorf("fatal error config file: %w", err)
+	if err := viper.ReadInConfig(); err != nil {
+		return Config{}, fmt.Errorf("could not read config: %w", err)
 	}
-	configFile = ConfigFile{}
 
-	if err := viper.Unmarshal(&configFile); err != nil {
-		return fmt.Errorf("fatal error config file: %w", err)
+	var cfg Config
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return Config{}, fmt.Errorf("could not unmarshal config: %w", err)
 	}
-	return nil
+
+	globalConfig = cfg
+	return cfg, nil
+}
+
+func Get() Config {
+	if globalConfig == (Config{}) {
+		panic("config not initialized: call config.Load first")
+	}
+	return globalConfig
 }

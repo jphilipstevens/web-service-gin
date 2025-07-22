@@ -13,53 +13,38 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 
-	"github.com/jphilipstevens/web-service-gin/v2/pkg/appTracer"
-	"github.com/jphilipstevens/web-service-gin/v2/pkg/config"
-	"github.com/jphilipstevens/web-service-gin/v2/pkg/dependencies"
-	"github.com/jphilipstevens/web-service-gin/v2/pkg/middleware"
+	"yourapp/pkg/appTracer"
+	"yourapp/pkg/config"
+	"yourapp/pkg/dependencies"
+	"yourapp/pkg/middleware"
 )
 
 const gracefulShutdownTimeout = 5 * time.Second
 
-// RouterFunc registers routes using the provided dependency container.
 type RouterFunc func(deps *dependencies.Dependencies)
 
-// Server exposes a composable HTTP server instance with optional components.
-// The generic type parameter indicates the application's database client type.
 type Server struct {
-	config config.ConfigFile
+	config config.Config
 	deps   *dependencies.Dependencies
 }
 
-// Config returns the loaded application configuration.
-func (s *Server) Config() config.ConfigFile {
+func (s *Server) Config() config.Config {
 	return s.config
 }
 
-// Dependencies returns the dependency container for advanced customization.
 func (s *Server) Dependencies() *dependencies.Dependencies {
 	return s.deps
 }
 
-// Use registers middleware to run after the built-in middleware stack.
 func (s *Server) Use(mw gin.HandlerFunc) {
 	s.deps.Router.Use(mw)
 }
 
-// RegisterRoutes allows modules to add routes to the server.
 func (s *Server) RegisterRoutes(fn RouterFunc) {
 	fn(s.deps)
 }
 
-// NewServer creates a new Server using the provided configuration options. Only
-// the router and tracer are initialized by default, leaving cache and database
-// setup to the caller.
-func NewServer(opts config.ConfigOptions) (*Server, error) {
-	if err := config.Init(opts); err != nil {
-		return nil, err
-	}
-	cfg := config.GetConfig()
-
+func New(cfg config.Config) *Server {
 	tracer := appTracer.NewAppTracer(cfg)
 
 	router := gin.New()
@@ -75,10 +60,12 @@ func NewServer(opts config.ConfigOptions) (*Server, error) {
 		Tracer: tracer,
 	}
 
-	return &Server{config: cfg, deps: deps}, nil
+	return &Server{
+		config: cfg,
+		deps:   deps,
+	}
 }
 
-// Run starts the HTTP server and blocks until a shutdown signal is received.
 func (s *Server) Run() error {
 	srv := &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", s.config.Server.Host, s.config.Server.Port),
@@ -91,7 +78,6 @@ func (s *Server) Run() error {
 		}
 	}()
 
-	// Listen for interrupt and terminate signals to shut down gracefully.
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
