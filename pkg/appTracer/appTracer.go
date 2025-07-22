@@ -25,24 +25,24 @@ type appTracerImpl struct {
 	tracer     trace.Tracer
 }
 
-func initTracer(configFile config.ConfigFile) (trace.Tracer, error) {
+func initTracer(cfg config.Config) (trace.Tracer, error) {
 	uptrace.ConfigureOpentelemetry(
-		uptrace.WithDSN(configFile.Uptrace.DSN),
-		uptrace.WithServiceName(configFile.AppName),
+		uptrace.WithDSN(cfg.Uptrace.DSN),
+		uptrace.WithServiceName(cfg.AppName),
 		uptrace.WithServiceVersion(version.Version),
 	)
 
-	return otel.Tracer(configFile.AppName), nil
+	return otel.Tracer(cfg.AppName), nil
 }
 
 // NewAppTracer creates a new AppTracer.
-func NewAppTracer(configFile config.ConfigFile) AppTracer {
-	tracer, err := initTracer(configFile)
+func NewAppTracer(cfg config.Config) AppTracer {
+	tracer, err := initTracer(cfg)
 	if err != nil {
 		panic(err)
 	}
 	return &appTracerImpl{
-		serverName: configFile.AppName,
+		serverName: cfg.AppName,
 		tracer:     tracer,
 	}
 }

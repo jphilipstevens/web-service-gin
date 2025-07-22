@@ -130,43 +130,52 @@ type ClientContext struct {
 }
 
 func GetClientContext(ctx context.Context) *ClientContext {
-	return ctx.Value(ClientContextKey).(*ClientContext)
+	val := ctx.Value(ClientContextKey)
+	if cc, ok := val.(*ClientContext); ok {
+		return cc
+	}
+	return nil
 }
 
 // since we are saving the client context as a pointer add any modifications to the client context here and handle multiple go routines safely
 
 func AddResponseTime(ctx context.Context, responseTime time.Duration) {
-	currentContext := ctx.Value(ClientContextKey).(*ClientContext)
-	currentContext.ResponseTime = responseTime
+	if currentContext := GetClientContext(ctx); currentContext != nil {
+		currentContext.ResponseTime = responseTime
+	}
 }
 
 func AddResponseInfo(ctx context.Context, response ResponseInfo) {
-	currentContext := ctx.Value(ClientContextKey).(*ClientContext)
-	currentContext.Response = response
+	if currentContext := GetClientContext(ctx); currentContext != nil {
+		currentContext.Response = response
+	}
 }
 
 func AddDownstreamCall(ctx context.Context, call DownstreamCall) {
-	currentContext := ctx.Value(ClientContextKey).(*ClientContext)
-	currentContext.Downstreams = append(currentContext.Downstreams, call)
+	if currentContext := GetClientContext(ctx); currentContext != nil {
+		currentContext.Downstreams = append(currentContext.Downstreams, call)
+	}
 }
 
 // AddDataStoreCall records a call to any data store in the current context.
 func AddDataStoreCall(ctx context.Context, call DataStoreCall) {
-	currentContext := ctx.Value(ClientContextKey).(*ClientContext)
-	currentContext.DataStore = append(currentContext.DataStore, call)
+	if currentContext := GetClientContext(ctx); currentContext != nil {
+		currentContext.DataStore = append(currentContext.DataStore, call)
+	}
 }
 
 func AddCacheCall(ctx context.Context, call CacheCall) {
-	currentContext := ctx.Value(ClientContextKey).(*ClientContext)
-	currentContext.Cache = append(currentContext.Cache, call)
-	dsCall := DataStoreCall{
-		ServiceTransaction: call.ServiceTransaction,
-		StoreType:          "cache",
-		Operation:          call.Action,
-		Key:                call.Key,
-		ResponseTime:       call.ResponseTime,
-		Error:              call.Error,
-		Hit:                &call.Hit,
+	if currentContext := GetClientContext(ctx); currentContext != nil {
+		currentContext.Cache = append(currentContext.Cache, call)
+		dsCall := DataStoreCall{
+			ServiceTransaction: call.ServiceTransaction,
+			StoreType:          "cache",
+			Operation:          call.Action,
+			Key:                call.Key,
+			ResponseTime:       call.ResponseTime,
+			Error:              call.Error,
+			Hit:                &call.Hit,
+		}
+		currentContext.DataStore = append(currentContext.DataStore, dsCall)
 	}
-	currentContext.DataStore = append(currentContext.DataStore, dsCall)
 }
