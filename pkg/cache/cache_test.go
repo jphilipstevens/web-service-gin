@@ -27,7 +27,7 @@ func setupTestRedis(t *testing.T) (*miniredis.Miniredis, Cacher) {
 		t.Fatalf("Failed to convert miniredis port to int: %v", err)
 	}
 
-	cfg := config.RedisClientConfig{
+	cfg := config.RedisConfig{
 		Host: mr.Host(),
 		Port: port,
 	}
@@ -69,8 +69,6 @@ func TestGet(t *testing.T) {
 }
 
 func TestSet(t *testing.T) {
-	config.Init(config.ConfigOptions{Path: "../../config", Name: "config", Type: "yaml"})
-	//	config.Init(config.ConfigOptions{Path: "example/config", Name: "config", Type: "yaml"})
 	mr, cacher := setupTestRedis(t)
 	defer mr.Close()
 

@@ -26,11 +26,17 @@ type DatabaseConfig struct {
 	Port            int           `mapstructure:"port"`
 	User            string        `mapstructure:"user"`
 	Password        string        `mapstructure:"password"`
-	Name            string        `mapstructure:"name"`
+	Driver          string        `mapstructure:"driver"`
+	DBName          string        `mapstructure:"dbname"`
 	SSLMode         string        `mapstructure:"sslmode"`
 	MaxOpenConns    int           `mapstructure:"max_open_conns"`
 	MaxIdleConns    int           `mapstructure:"max_idle_conns"`
 	ConnMaxLifetime time.Duration `mapstructure:"conn_max_lifetime"`
+}
+
+type UptraceConfig struct {
+	DSN      string `mapstructure:"dsn"`
+	Endpoint string `mapstructure:"endpoint"`
 }
 
 type Config struct {
@@ -38,6 +44,7 @@ type Config struct {
 	Server  ServerConfig   `mapstructure:"server"`
 	Redis   RedisConfig    `mapstructure:"redis"`
 	DB      DatabaseConfig `mapstructure:"database"`
+	Uptrace UptraceConfig  `mapstructure:"uptrace"`
 }
 
 var globalConfig Config
