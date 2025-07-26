@@ -64,9 +64,10 @@ func GetConfig() ConfigFile {
 	return configFile
 }
 
-// Config entries can be set in the config file or as environment variables.
-// When set as environment variables, the key should be in the format where the dot notation is replaced with an underscore.
-// For example, the key "redis.host" can be set as the environment variable "REDIS_HOST"
+// Config entries can be specified in the config file and overridden using
+// environment variables. To map an environment variable to a config field,
+// replace dots in the key with underscores and use uppercase letters. For
+// example, the key "redis.host" becomes "REDIS_HOST".
 func Init(opts ConfigOptions) error {
 	viper.SetConfigName(opts.Name)
 	viper.AddConfigPath(opts.Path)
@@ -76,6 +77,7 @@ func Init(opts ConfigOptions) error {
 	}
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
 
 	// Load configuration
 	err := viper.ReadInConfig()

@@ -44,9 +44,15 @@ The application is configured using a YAML file located next to `main.go`. Edit 
 
    log:
      level: info
-     format: json
+   format: json
 
    Adjust the values according to your environment and requirements. The `maxOpenConns`, `maxIdleConns`, and `connMaxLifetime` settings control database connection pooling.
+
+You can override any configuration value with an environment variable by
+replacing dots in the key with underscores and uppercasing it. For example,
+`REDIS_HOST=cache.example.com` overrides `redis.host`. This is useful when
+deploying to containerized or cloud environments where settings are provided via
+environment variables.
 
 ## Features
 
