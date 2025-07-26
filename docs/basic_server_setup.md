@@ -33,6 +33,10 @@ uptrace:
 
 Save the file as `config.yaml` in a directory accessible to your application.
 
+Any configuration value can be overridden using environment variables. Replace
+dots in the key with underscores and convert it to uppercase. For example,
+`REDIS_HOST=cache.example.com` overrides `redis.host`.
+
 ## 2. Implement `main.go`
 
 ```go
