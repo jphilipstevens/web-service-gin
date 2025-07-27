@@ -50,6 +50,28 @@ func main() {
 
     srv := server.New(config.Get())
 
+    srv.UseBefore(func(c *gin.Context) {
+        log.Println("before built-in")
+        c.Next()
+    })
+
+    srv.UseAfter(func(c *gin.Context) {
+        log.Println("before routes")
+        c.Next()
+    })
+
+    srv.UseFinal(func(c *gin.Context) {
+        c.Next()
+        log.Println("after route")
+    })
+
+    // Middleware runs in the following order:
+    //   1. UseBefore middleware
+    //   2. built-in middleware
+    //   3. UseAfter middleware
+    //   4. route handlers
+    //   5. UseFinal middleware
+
     srv.RegisterRoutes(registerRoutes)
 
     if err := srv.Run(); err != nil {
