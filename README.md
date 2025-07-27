@@ -121,17 +121,37 @@ Client projects can extend the request pipeline by registering their own middlew
 func(c *gin.Context)
 ```
 
-Use the server's `Use` method in `main.go` to add middleware that will run for every route after the built‑in middleware:
+Use `UseBefore`, `UseAfter`, and `UseFinal` to extend the middleware stack. All
+middleware must be registered before calling `RegisterRoutes` so it can be
+applied in the correct order. The execution sequence is:
+
+1. `UseBefore` middleware
+2. built-in middleware (recovery, tracing, logging, etc.)
+3. `UseAfter` middleware
+4. route handlers
+5. `UseFinal` middleware
+
+`UseFinal` handlers should always call `c.Next()` so the request reaches the
+actual route handler before running their cleanup logic:
 
 ```go
-srv, _ := app.NewServer(cfg)
+srv := server.New(cfg)
 
-srvMw := func(c *gin.Context) {
-    log.Printf("path: %s", c.Request.URL.Path)
+srv.UseBefore(func(c *gin.Context) {
+    log.Println("before built-in")
     c.Next()
-}
+})
 
-srv.Use(srvMw)
+srv.UseAfter(func(c *gin.Context) {
+    log.Println("before routes")
+    c.Next()
+})
+
+srv.UseFinal(func(c *gin.Context) {
+    c.Next()
+    log.Println("after route")
+})
+
 srv.RegisterRoutes(registerRoutes)
 srv.Run()
 ```

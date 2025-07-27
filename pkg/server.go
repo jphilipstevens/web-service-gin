@@ -13,76 +13,94 @@ import (
 	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 
-	"github.com/jphilipstevens/web-service-gin/v2/pkg/appTracer"
 	"github.com/jphilipstevens/web-service-gin/v2/pkg/config"
-	"github.com/jphilipstevens/web-service-gin/v2/pkg/dependencies"
 	"github.com/jphilipstevens/web-service-gin/v2/pkg/middleware"
 )
 
 const gracefulShutdownTimeout = 5 * time.Second
 
-// RouterFunc registers routes using the provided dependency container.
-type RouterFunc func(deps *dependencies.Dependencies)
-
 // Server exposes a composable HTTP server instance with optional components.
-// The generic type parameter indicates the application's database client type.
+// Middleware can be registered before or after the built-in set using
+// UseBefore and UseAfter.
 type Server struct {
-	config config.ConfigFile
-	deps   *dependencies.Dependencies
+	router            *gin.Engine
+	config            config.Config
+	preMiddleware     []gin.HandlerFunc
+	postMiddleware    []gin.HandlerFunc
+	finalMiddleware   []gin.HandlerFunc
+	middlewareApplied bool
 }
 
-// Config returns the loaded application configuration.
-func (s *Server) Config() config.ConfigFile {
-	return s.config
+// New creates a Server with the provided configuration. Middleware is applied
+// when Run is invoked so callers can register their own hooks beforehand.
+func New(cfg config.Config) *Server {
+	s := &Server{
+		router: gin.New(),
+		config: cfg,
+	}
+	return s
 }
 
-// Dependencies returns the dependency container for advanced customization.
-func (s *Server) Dependencies() *dependencies.Dependencies {
-	return s.deps
+// UseBefore registers middleware that executes before the built-in stack.
+func (s *Server) UseBefore(mw ...gin.HandlerFunc) {
+	s.preMiddleware = append(s.preMiddleware, mw...)
 }
 
-// Use registers middleware to run after the built-in middleware stack.
-func (s *Server) Use(mw gin.HandlerFunc) {
-	s.deps.Router.Use(mw)
+// UseAfter registers middleware that executes after the built-in stack.
+func (s *Server) UseAfter(mw ...gin.HandlerFunc) {
+	s.postMiddleware = append(s.postMiddleware, mw...)
+}
+
+// UseFinal registers middleware that executes after the route handlers.
+// Each final middleware must call c.Next() to ensure the request flows to the
+// handlers before running its cleanup logic.
+func (s *Server) UseFinal(mw ...gin.HandlerFunc) {
+	s.finalMiddleware = append(s.finalMiddleware, mw...)
+}
+
+// applyMiddleware attaches all registered middleware to the router in
+// the correct order. It only executes once even if called multiple times.
+func (s *Server) applyMiddleware() {
+	if s.middlewareApplied {
+		return
+	}
+
+	if len(s.preMiddleware) > 0 {
+		s.router.Use(s.preMiddleware...)
+	}
+
+	s.router.Use(gin.Recovery())
+	s.router.Use(otelgin.Middleware(s.config.AppName))
+	s.router.Use(middleware.ClientContextMiddleware())
+	s.router.Use(middleware.TraceMiddleware(s.config.AppName))
+	s.router.Use(middleware.ErrorHandler)
+	s.router.Use(middleware.JsonLogger())
+
+	if len(s.postMiddleware) > 0 {
+		s.router.Use(s.postMiddleware...)
+	}
+
+	if len(s.finalMiddleware) > 0 {
+		s.router.Use(s.finalMiddleware...)
+	}
+
+	s.middlewareApplied = true
 }
 
 // RegisterRoutes allows modules to add routes to the server.
-func (s *Server) RegisterRoutes(fn RouterFunc) {
-	fn(s.deps)
+func (s *Server) RegisterRoutes(fn func(r *gin.Engine)) {
+	s.applyMiddleware()
+	fn(s.router)
 }
 
-// NewServer creates a new Server using the provided configuration options. Only
-// the router and tracer are initialized by default, leaving cache and database
-// setup to the caller.
-func NewServer(opts config.ConfigOptions) (*Server, error) {
-	if err := config.Init(opts); err != nil {
-		return nil, err
-	}
-	cfg := config.GetConfig()
-
-	tracer := appTracer.NewAppTracer(cfg)
-
-	router := gin.New()
-	router.Use(gin.Recovery())
-	router.Use(otelgin.Middleware(cfg.AppName))
-	router.Use(middleware.ClientContextMiddleware())
-	router.Use(middleware.TraceMiddleware(cfg.AppName))
-	router.Use(middleware.ErrorHandler)
-	router.Use(middleware.JsonLogger())
-
-	deps := &dependencies.Dependencies{
-		Router: router,
-		Tracer: tracer,
-	}
-
-	return &Server{config: cfg, deps: deps}, nil
-}
-
-// Run starts the HTTP server and blocks until a shutdown signal is received.
+// Run starts the HTTP server, applies middleware in the correct order, and
+// waits for a shutdown signal.
 func (s *Server) Run() error {
+	s.applyMiddleware()
+
 	srv := &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", s.config.Server.Host, s.config.Server.Port),
-		Handler: s.deps.Router,
+		Handler: s.router,
 	}
 
 	go func() {
@@ -91,22 +109,17 @@ func (s *Server) Run() error {
 		}
 	}()
 
-	// Listen for interrupt and terminate signals to shut down gracefully.
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	logrus.Info("Shutdown Server ...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), gracefulShutdownTimeout)
 	defer cancel()
+
 	if err := srv.Shutdown(ctx); err != nil {
-		logrus.Fatal("Server Shutdown:", err)
+		logrus.Fatalf("server shutdown failed: %v", err)
 	}
 
-	select {
-	case <-ctx.Done():
-		logrus.Info("timeout of 5 seconds.")
-	}
-	logrus.Info("Server exiting")
+	logrus.Info("server exited properly")
 	return nil
 }
