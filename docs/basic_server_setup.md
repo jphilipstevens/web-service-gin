@@ -11,24 +11,6 @@ app_name: demo
 server:
   host: 0.0.0.0
   port: 8080
-redis:
-  host: localhost
-  port: 6379
-  password: ""
-  db: 0
-database:
-  host: localhost
-  port: 5432
-  user: demo
-  password: demo
-  driver: postgres
-  dbname: demo
-  maxOpenConns: 5
-  maxIdleConns: 2
-  connMaxLifetime: 30m
-uptrace:
-  dsn: ""
-  endpoint: ""
 ```
 
 Save the file as `config.yaml` in a directory accessible to your application.
@@ -47,12 +29,10 @@ import (
 
     "github.com/gin-gonic/gin"
     "github.com/jphilipstevens/web-service-gin/v2/pkg/config"
-    "github.com/jphilipstevens/web-service-gin/v2/pkg/dependencies"
     "github.com/jphilipstevens/web-service-gin/v2/pkg/server"
 )
 
-func registerRoutes(deps *dependencies.Dependencies) {
-    r := deps.Router
+func registerRoutes(r *gin.Engine) {
     r.GET("/ping", func(c *gin.Context) {
         c.JSON(200, gin.H{"message": "pong"})
     })
@@ -62,11 +42,13 @@ func registerRoutes(deps *dependencies.Dependencies) {
     })
 }
 
+
 func main() {
-    srv, err := server.NewServer(config.ConfigOptions{Path: ".", Name: "config", Type: "yaml"})
-    if err != nil {
-        log.Fatalf("failed to create server: %v", err)
+    if err := config.Init(config.ConfigOptions{Path: ".", Name: "config", Type: "yaml"}); err != nil {
+        log.Fatalf("failed to load config: %v", err)
     }
+
+    srv := server.New(config.Get())
 
     srv.RegisterRoutes(registerRoutes)
 
