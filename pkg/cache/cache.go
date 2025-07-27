@@ -9,7 +9,6 @@ import (
 	"github.com/jphilipstevens/web-service-gin/v2/pkg/apiErrors"
 	"github.com/jphilipstevens/web-service-gin/v2/pkg/appTracer"
 	"github.com/jphilipstevens/web-service-gin/v2/pkg/clientContext"
-	"github.com/jphilipstevens/web-service-gin/v2/pkg/config"
 	"github.com/jphilipstevens/web-service-gin/v2/pkg/datastore"
 
 	"github.com/redis/go-redis/extra/redisotel/v9"
@@ -34,7 +33,7 @@ type redisCache struct {
 var ErrCacheMiss = apiErrors.NewNotFoundError("")
 var ErrCacheGeneric = apiErrors.NewGenericError("")
 
-func NewCacher(cfg config.RedisClientConfig, appTracer appTracer.AppTracer) Cacher {
+func NewCacher(cfg RedisClientConfig, appTracer appTracer.AppTracer) Cacher {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%d", cfg.Host, cfg.Port),
 		Password: cfg.Password,

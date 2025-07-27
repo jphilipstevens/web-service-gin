@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jphilipstevens/web-service-gin/v2/pkg/config"
 	"github.com/jphilipstevens/web-service-gin/v2/testUtils"
 
 	"github.com/alicebob/miniredis/v2"
@@ -27,7 +26,7 @@ func setupTestRedis(t *testing.T) (*miniredis.Miniredis, Cacher) {
 		t.Fatalf("Failed to convert miniredis port to int: %v", err)
 	}
 
-	cfg := config.RedisClientConfig{
+	cfg := RedisClientConfig{
 		Host: mr.Host(),
 		Port: port,
 	}
@@ -69,8 +68,6 @@ func TestGet(t *testing.T) {
 }
 
 func TestSet(t *testing.T) {
-	config.Init(config.ConfigOptions{Path: "../../config", Name: "config", Type: "yaml"})
-	//	config.Init(config.ConfigOptions{Path: "example/config", Name: "config", Type: "yaml"})
 	mr, cacher := setupTestRedis(t)
 	defer mr.Close()
 

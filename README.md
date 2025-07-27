@@ -124,14 +124,14 @@ func(c *gin.Context)
 Use the server's `Use` method in `main.go` to add middleware that will run for every route after the built‑in middleware:
 
 ```go
-srv, _ := app.NewServer(cfg)
+srv := server.New(cfg)
 
 srvMw := func(c *gin.Context) {
     log.Printf("path: %s", c.Request.URL.Path)
     c.Next()
 }
 
-srv.Use(srvMw)
+srv.UseAfter(srvMw)
 srv.RegisterRoutes(registerRoutes)
 srv.Run()
 ```

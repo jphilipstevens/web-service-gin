@@ -10,7 +10,6 @@ import (
 
 	"github.com/jphilipstevens/web-service-gin/v2/pkg/appTracer"
 	"github.com/jphilipstevens/web-service-gin/v2/pkg/clientContext"
-	"github.com/jphilipstevens/web-service-gin/v2/pkg/config"
 	"github.com/jphilipstevens/web-service-gin/v2/pkg/datastore"
 )
 
@@ -59,7 +58,7 @@ type DatabaseImpl struct {
 // 4. If successful, returns a new DatabaseImpl instance.
 // 5. If any step fails, it returns an error and closes any opened connection.
 
-func NewDatabase(dbConfig config.DatabaseConfig, appTracer appTracer.AppTracer) (Database, error) {
+func NewDatabase(dbConfig DatabaseConfig, appTracer appTracer.AppTracer) (Database, error) {
 	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s", dbConfig.Host, dbConfig.Port, dbConfig.User, dbConfig.Password, dbConfig.DBName, dbConfig.SSLMode)
 	db, err := sql.Open(dbConfig.Driver, dsn)
 	if err != nil {
