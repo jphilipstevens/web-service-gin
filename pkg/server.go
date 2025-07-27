@@ -23,10 +23,12 @@ const gracefulShutdownTimeout = 5 * time.Second
 // Middleware can be registered before or after the built-in set using
 // UseBefore and UseAfter.
 type Server struct {
-	router         *gin.Engine
-	config         config.Config
-	preMiddleware  []gin.HandlerFunc
-	postMiddleware []gin.HandlerFunc
+	router            *gin.Engine
+	config            config.Config
+	preMiddleware     []gin.HandlerFunc
+	postMiddleware    []gin.HandlerFunc
+	finalMiddleware   []gin.HandlerFunc
+	middlewareApplied bool
 }
 
 // New creates a Server with the provided configuration. Middleware is applied
@@ -49,14 +51,20 @@ func (s *Server) UseAfter(mw ...gin.HandlerFunc) {
 	s.postMiddleware = append(s.postMiddleware, mw...)
 }
 
-// RegisterRoutes allows modules to add routes to the server.
-func (s *Server) RegisterRoutes(fn func(r *gin.Engine)) {
-	fn(s.router)
+// UseFinal registers middleware that executes after the route handlers.
+// Each final middleware must call c.Next() to ensure the request flows to the
+// handlers before running its cleanup logic.
+func (s *Server) UseFinal(mw ...gin.HandlerFunc) {
+	s.finalMiddleware = append(s.finalMiddleware, mw...)
 }
 
-// Run starts the HTTP server, applies middleware in the correct order, and
-// waits for a shutdown signal.
-func (s *Server) Run() error {
+// applyMiddleware attaches all registered middleware to the router in
+// the correct order. It only executes once even if called multiple times.
+func (s *Server) applyMiddleware() {
+	if s.middlewareApplied {
+		return
+	}
+
 	if len(s.preMiddleware) > 0 {
 		s.router.Use(s.preMiddleware...)
 	}
@@ -71,6 +79,24 @@ func (s *Server) Run() error {
 	if len(s.postMiddleware) > 0 {
 		s.router.Use(s.postMiddleware...)
 	}
+
+	if len(s.finalMiddleware) > 0 {
+		s.router.Use(s.finalMiddleware...)
+	}
+
+	s.middlewareApplied = true
+}
+
+// RegisterRoutes allows modules to add routes to the server.
+func (s *Server) RegisterRoutes(fn func(r *gin.Engine)) {
+	s.applyMiddleware()
+	fn(s.router)
+}
+
+// Run starts the HTTP server, applies middleware in the correct order, and
+// waits for a shutdown signal.
+func (s *Server) Run() error {
+	s.applyMiddleware()
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf("%s:%d", s.config.Server.Host, s.config.Server.Port),
