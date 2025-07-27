@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"io"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/jphilipstevens/web-service-gin/v2/pkg/clientContext"
@@ -13,23 +12,26 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// JsonLogger records structured details about each HTTP request and response.
+// It assumes the global logger has been initialized elsewhere via SetupLogger.
 func JsonLogger() gin.HandlerFunc {
-	logrus.SetFormatter(&logrus.JSONFormatter{})
-	logrus.SetLevel(logrus.DebugLevel)
-	logrus.SetOutput(os.Stdout)
-	logrus.SetReportCaller(true)
-
 	return func(c *gin.Context) {
 		startTime := time.Now()
 
 		var requestBody []byte
 		if c.Request.Body != nil {
-			requestBody, _ = io.ReadAll(c.Request.Body)
-			// Restore the original body to avoid affecting subsequent handlers
-			c.Request.Body = io.NopCloser(bytes.NewBuffer(requestBody))
+			body, err := io.ReadAll(c.Request.Body)
+			if err != nil {
+				logrus.WithError(err).Warn("Failed to read request body")
+			} else {
+				requestBody = body
+			}
+			c.Request.Body = io.NopCloser(bytes.NewBuffer(body))
+			if len(requestBody) > 1024 {
+				requestBody = []byte("<<truncated>>")
+			}
 		}
 
-		// Process the users request
 		c.Next()
 
 		responseTime := time.Since(startTime)
@@ -41,15 +43,35 @@ func JsonLogger() gin.HandlerFunc {
 		clientContext.AddResponseTime(c.Request.Context(), responseTime)
 		currentContext := clientContext.GetClientContext(c.Request.Context())
 
+		status := writer.Status()
 		level := logrus.InfoLevel
-		if currentContext.Response.Status >= http.StatusInternalServerError {
+		switch {
+		case status >= http.StatusInternalServerError:
 			level = logrus.ErrorLevel
+		case status >= http.StatusBadRequest:
+			level = logrus.WarnLevel
+		default:
+			level = logrus.InfoLevel
 		}
 
-		// Log the entry as JSON
-		logrus.WithFields(logrus.Fields{
+		fields := logrus.Fields{
+			"method":        c.Request.Method,
+			"path":          c.Request.URL.Path,
+			"status":        status,
+			"latency":       responseTime.String(),
+			"ip":            c.ClientIP(),
+			"userAgent":     c.Request.UserAgent(),
 			"clientContext": *currentContext,
-		}).Log(level, "Request logged")
-	}
+		}
 
+		var skipBodyPaths = map[string]bool{
+			"/auth/login":    true,
+			"/auth/register": true,
+		}
+		if len(requestBody) > 0 && !skipBodyPaths[c.Request.URL.Path] {
+			fields["requestBody"] = string(requestBody)
+		}
+
+		logrus.WithFields(fields).Log(level, "Request logged")
+	}
 }

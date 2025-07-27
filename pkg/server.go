@@ -34,6 +34,8 @@ type Server struct {
 // New creates a Server with the provided configuration. Middleware is applied
 // when Run is invoked so callers can register their own hooks beforehand.
 func New(cfg config.Config) *Server {
+	middleware.SetupLogger()
+
 	s := &Server{
 		router: gin.New(),
 		config: cfg,
