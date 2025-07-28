@@ -105,6 +105,8 @@ func (s *Server) Run() error {
 		Handler: s.router,
 	}
 
+	logrus.Infof("🚀 Listening on host %s, port %d", s.config.Server.Host, s.config.Server.Port)
+
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			logrus.Fatalf("failed to start server: %v", err)
