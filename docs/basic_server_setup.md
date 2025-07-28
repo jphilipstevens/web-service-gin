@@ -13,6 +13,7 @@ server:
   port: 8080
 uptrace:
   dsn: http://project2_secret_token@localhost:14317/2
+enable_open_telemetry: true
 ```
 
 Save the file as `config.yaml` in a directory accessible to your application.
@@ -89,3 +90,28 @@ go run main.go
 ```
 
 The server listens on the configured port and exposes `/ping` and `/hello` routes.
+
+## Advanced usage
+
+If you need finer control over the server lifecycle, you can apply middleware
+and start your own `http.Server` instance:
+
+```go
+srv := server.New(config.Get())
+
+srv.RegisterRoutes(registerRoutes)
+srv.ApplyMiddleware()
+
+httpSrv := &http.Server{Handler: srv.Router()}
+ln, _ := net.Listen("tcp", ":8080")
+go httpSrv.Serve(ln)
+
+go func() {
+    // trigger shutdown some other way
+    time.Sleep(time.Second)
+    p, _ := os.FindProcess(os.Getpid())
+    p.Signal(syscall.SIGTERM)
+}()
+
+server.GracefulShutdown(httpSrv, time.Second*5)
+```

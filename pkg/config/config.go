@@ -25,6 +25,9 @@ type Config struct {
 	AppName string        `mapstructure:"app_name"`
 	Server  ServerConfig  `mapstructure:"server"`
 	Uptrace UptraceConfig `mapstructure:"uptrace"`
+	// EnableOpenTelemetry toggles insertion of tracing middleware.
+	// Defaults to true for backward compatibility.
+	EnableOpenTelemetry bool `mapstructure:"enable_open_telemetry"`
 }
 
 // ConfigOptions defines how the configuration file is located and parsed.
@@ -55,6 +58,9 @@ func Init(opts ConfigOptions) error {
 	if opts.Type != "" {
 		viper.SetConfigType(opts.Type)
 	}
+
+	// Preserve backward compatibility by defaulting tracing to enabled.
+	viper.SetDefault("enable_open_telemetry", true)
 
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()

@@ -27,6 +27,7 @@ The application is configured using a YAML file located next to `main.go`. Edit 
 
    uptrace:
      dsn: http://project2_secret_token@localhost:14317/2
+   enable_open_telemetry: true
 
    database:
      host: localhost
@@ -160,6 +161,21 @@ srv.Run()
 ```
 
 Core middleware for tracing, context propagation, error handling and logging always runs first and cannot be replaced. Custom middleware executes next, followed by any route‑specific middleware configured within modules.
+
+### Advanced server control
+
+For specialized scenarios you may want to bootstrap the HTTP server yourself. Use
+`ApplyMiddleware()` to attach all middleware, retrieve the router with `Router()`,
+and manage shutdown using `GracefulShutdown`:
+
+```go
+srv.ApplyMiddleware()
+s := &http.Server{Handler: srv.Router()}
+go s.ListenAndServe()
+
+// trigger shutdown somehow
+server.GracefulShutdown(s, time.Second*5)
+```
 
 ## Structure
 
