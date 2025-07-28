@@ -11,6 +11,8 @@ app_name: demo
 server:
   host: 0.0.0.0
   port: 8080
+uptrace:
+  dsn: http://project2_secret_token@localhost:14317/2
 ```
 
 Save the file as `config.yaml` in a directory accessible to your application.

@@ -13,12 +13,18 @@ type ServerConfig struct {
 	Port int    `mapstructure:"port"`
 }
 
+// UptraceConfig holds the DSN used to connect to Uptrace for tracing.
+type UptraceConfig struct {
+	DSN string `mapstructure:"dsn"`
+}
+
 // Config represents the minimal application configuration required to start
 // the HTTP server. Additional configuration should be loaded separately by the
 // modules that need it.
 type Config struct {
-	AppName string       `mapstructure:"app_name"`
-	Server  ServerConfig `mapstructure:"server"`
+	AppName string        `mapstructure:"app_name"`
+	Server  ServerConfig  `mapstructure:"server"`
+	Uptrace UptraceConfig `mapstructure:"uptrace"`
 }
 
 // ConfigOptions defines how the configuration file is located and parsed.
