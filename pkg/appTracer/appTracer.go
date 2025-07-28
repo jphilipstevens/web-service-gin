@@ -5,7 +5,6 @@ package appTracer
 
 import (
 	"context"
-	"os"
 
 	"github.com/jphilipstevens/web-service-gin/v2/pkg/config"
 	"github.com/jphilipstevens/web-service-gin/v2/pkg/version"
@@ -28,7 +27,7 @@ type appTracerImpl struct {
 
 func initTracer(cfg config.Config) (trace.Tracer, error) {
 	uptrace.ConfigureOpentelemetry(
-		uptrace.WithDSN(os.Getenv("UPTRACE_DSN")),
+		uptrace.WithDSN(cfg.Uptrace.DSN),
 		uptrace.WithServiceName(cfg.AppName),
 		uptrace.WithServiceVersion(version.Version),
 	)

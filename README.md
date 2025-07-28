@@ -25,6 +25,9 @@ The application is configured using a YAML file located next to `main.go`. Edit 
      port: 8080
      timeout: 10s
 
+   uptrace:
+     dsn: http://project2_secret_token@localhost:14317/2
+
    database:
      host: localhost
      port: 5432
