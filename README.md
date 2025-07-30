@@ -177,6 +177,27 @@ go s.ListenAndServe()
 server.GracefulShutdown(s, time.Second*5)
 ```
 
+### Extending beyond HTTP
+
+The HTTP server exposes composable building blocks so you can run additional
+protocols alongside Gin. For example, start a gRPC or GraphQL server in the same
+process and manage their lifecycles together:
+
+```go
+go srv.Run() // existing HTTP service
+
+grpcSrv := grpc.NewServer()
+go grpcSrv.Serve(lis)
+
+// shutdown logic
+server.GracefulShutdown(httpSrv, time.Second*5)
+grpcSrv.GracefulStop()
+```
+
+The template keeps middleware, configuration and shutdown utilities decoupled,
+making it straightforward to integrate other protocols without altering the core
+modules.
+
 ## Structure
 
 ```

@@ -115,3 +115,23 @@ go func() {
 
 server.GracefulShutdown(httpSrv, time.Second*5)
 ```
+
+## Adding gRPC or GraphQL servers
+
+The modular design allows you to start other protocols alongside the HTTP
+server. Initialize your gRPC or GraphQL handler, then run them concurrently with
+the Gin server:
+
+```go
+go httpSrv.Serve(ln) // existing HTTP service
+
+grpcSrv := grpc.NewServer()
+go grpcSrv.Serve(grpcLn)
+
+// on shutdown
+server.GracefulShutdown(httpSrv, time.Second*5)
+grpcSrv.GracefulStop()
+```
+
+The core packages remain agnostic to additional transports, so you can compose
+multiple servers without modifying the template itself.
