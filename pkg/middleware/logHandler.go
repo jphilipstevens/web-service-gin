@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jphilipstevens/web-service-gin/v2/pkg/clientContext"
+	"github.com/jphilipstevens/web-service-gin/v2/pkg/logutils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -22,7 +23,7 @@ func JsonLogger() gin.HandlerFunc {
 		if c.Request.Body != nil {
 			body, err := io.ReadAll(c.Request.Body)
 			if err != nil {
-				logrus.WithError(err).Warn("Failed to read request body")
+				logutils.WithTrace(c.Request.Context()).WithError(err).Warn("Failed to read request body")
 			} else {
 				requestBody = body
 			}
@@ -72,6 +73,6 @@ func JsonLogger() gin.HandlerFunc {
 			fields["requestBody"] = string(requestBody)
 		}
 
-		logrus.WithFields(fields).Log(level, "Request logged")
+		logutils.WithTrace(c.Request.Context()).WithFields(fields).Log(level, "Request logged")
 	}
 }
